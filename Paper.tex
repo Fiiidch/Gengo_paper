@@ -118,7 +118,7 @@ inverse scattering \sep non-destructive testing \sep ultrasonic NDT \sep defect 
 \end{keywords}
 \maketitle
 \section{Introduction}\label{Introduction}
-Structural Health Monitoring (SHM) of engineered components aims to localize and characterize defects. The importance of which depends on the cost of failure, which is especially relevant in aviation, hence many methods of performing SHM on flat structures has been explored and documented. Among the methods, Piezoelectric sensors are promising from a commercial point of view due to their low cost, however increased challenges are noted when monitoring CFRP components \cite{Aircraft_NDT}. Methods for CFRP specifically are explored in \cite{Current_Methods}.
+Structural Health Monitoring (SHM) of engineered components aims to localize and characterize defects. The importance of SHM depends on the cost of failure, which is especially relevant in aviation, hence many methods of performing SHM on flat structures have been explored and documented. Among these methods, Piezoelectric sensors are promising from a commercial point of view due to their low cost. However, increased challenges are noted when monitoring CFRP components \cite{Aircraft_NDT}. Different state if the art Methods for CFRP specifically are explored in \cite{Current_Methods}.
 
 Sparse monitoring using Piezoelectric sensors (measuring at a few strategically placed sensors) would be therefore be especially desirable, but it typically demands detailed numerical forward models that are difficult to build and maintain in composites \cite{Modelling_Challenges}. Carbon-fiber-reinforced polymer (CFRP) plates, in particular, exhibit variability from layup and manufacturing that undermines predictive digital twins \cite{Manufacturing_Variability_Problems}.
 
@@ -132,7 +132,7 @@ We validate the approach experimentally on an anisotropic CFRP plate, demonstrat
 \section{Methodology}
 The test specimen is a $25\,\mathrm{cm}\times25\,\mathrm{cm}$ bi-directional CFRP plate, $1.3\,\mathrm{mm}$ thick. Five ceramic piezoelectric transducers are bonded to the plate. They are excited using an 80\,kHz center-frequency Ricker wavelet pulse. An LDV scans the plate on a $104\times104$ grid, recording the out-of-plane velocity over time (see Figure~\ref{fig:Diag_LDV}). Figure~\ref{fig:Screenshot} shows one frame of such a measurement. This scan is repeated for each of the five transducers; these acquisitions constitute the one-time calibration step.
 
-Transducers are low-cost ceramic discs of $12\,\mathrm{mm}$ diameter. The drive is a periodic pulse train with a $2\,\mathrm{ms}$ repetition period, using the 80\,kHz Ricker wavelet as the pulse shape to enforce timing periodicity. Data are sampled at $625\,\mathrm{kHz}$ and low-pass filtered to the analysis band prior to operator estimation. Each grid location is acquired with 10 repeats; within each acquisition, a 5-pulse train (total duration $\approx10\,\mathrm{ms}$) is emitted. The five pulses are segmented and treated as distinct measurements to increase robustness of the empirical impulse-response estimation. Transducers were bonded using a hand-applied, temperature-activated adhesive; exact formulation and bond thickness were not recorded. It is not required, as the formalism only compared responses between points, so the coupling properties of the transducers are not important to know.
+The transducers are commercially available low-cost brass–ceramic piezoelectric discs with a nominal diameter of 12 mm. The drive is a periodic pulse train with a $2\,\mathrm{ms}$ repetition period, using a 80\,kHz Ricker wavelet as the pulse shape to enforce timing periodicity. Data are sampled at $625\,\mathrm{kHz}$ and low-pass filtered to the 50\,kHz prior to operator estimation. Each grid location is acquired with 10 repeats 5 separate times. I.e. we obtain 5 sets of measurements total, each having been averaged 10 times. Transducers were bonded using a hand-applied, temperature-activated adhesive; exact formulation and bond thickness were not recorded. As derived in Section \ref{Empirical impulse responses}, the method is independent of the source transfer function, and thus works for a wide range of unknown coupling properties.
 
 
 \begin{figure}
@@ -144,18 +144,15 @@ Transducers are low-cost ceramic discs of $12\,\mathrm{mm}$ diameter. The drive 
 
 
 
-After calibration, a $1\,\mathrm{cm}^3$ iron cube is bonded to the plate to simulate a defect. During monitoring, we excite each transducer again but measure only at the transducer locations. In our setup, the LDV acquires these sparse responses at the transducer positions; in principle, the transducers themselves can act as receivers, enabling fully automated, remote NDT/SHM. See Appendix~\ref{Appendix_Piezoelectric} for additional discussion of piezoelectric sensing considerations.
+After calibration, a $1\,\mathrm{cm}^3$ iron cube is bonded to the plate to simulate a defect. During monitoring, we excite each transducer again but measure only at the transducer locations. In our setup, the LDV acquires these sparse responses at the transducer positions; in principle, the transducers themselves can act as receivers, which could enable fully automated, remote NDT/SHM. This could enable cost-effective, highly frequent SHM for important components at a press of a button. See Appendix~\ref{Appendix_Piezoelectric} for additional discussion of piezoelectric sensing considerations.
 
 To characterize the plate, we estimate its dispersion. We extract an x--t slice along the axis through the active transducer from Figure~\ref{fig:Screenshot}, window the time axis to exclude edge reflections (Figure~\ref{fig:Dispersion:b}), and compute a 2D FFT to obtain the $k$--$\omega$ spectrum. Selecting the peak-energy wavenumber $k^*(f)$ for each frequency yields the phase velocity $v_p(f)=2\pi f/k^*(f)$ and wavelength $\lambda(f)=2\pi/k^*(f)$ (Figure~\ref{fig:Dispersion:a}).
 
 
 
-
-
-
 \begin{figure}
   \centering
-  \includegraphics[width=0.5\linewidth]{Figures/Misc/LDV_Diag.png}
+  \includegraphics[width=0.5\linewidth]{Figures/Raw_data/150khz0.17ms.png}
   \caption{Snapshot of the CFRP plate excitation. TODO: Alle Sensor locations rein plotten}
   \label{fig:Screenshot}
 \end{figure}
@@ -184,10 +181,10 @@ To characterize the plate, we estimate its dispersion. We extract an x--t slice 
 \subsection{System assumptions}\label{System assumptions}
 We assume: (i) linearity; (ii) time invariance; (iii) reciprocity; (iv) practical flatness (LDV access); and (v) the ability to control the excitation of the material relative to noise.
 
-Assumptions (i), (ii), and (iii) are naturally satisfied for mechanical waves under standard physical conditions. Assumption (iv) refers to geometries where the object thickness is small relative to its lateral dimensions, typically valid for plate-like components such as aircraft fuselage panels and shell structures. Assumption (v) simply requires controlled excitation capability, which is standard in active NDT configurations using piezoelectric or electromagnetic transducers.
+Assumptions (i), (ii), and (iii) are naturally satisfied for mechanical waves under standard conditions. Assumption (iv) refers to geometries where the object thickness is small relative to its lateral dimensions, typically valid for plate-like components such as aircraft fuselage panels and shell structures. Assumption (v) simply requires controlled excitation capability, which is standard in active NDT configurations using piezoelectric or electromagnetic transducers.
 
 \subsection{Terminology and Notation}
-We work with discrete-time vectors and matrices throughout. The spatial domain is discretized into a set of points indexed by integers without implying any particular geometric arrangement. For instance, a 100×100 scan grid of a square plate yields 10,000 points labeled 1 through 10,000, with the specific mapping arbitrary but fixed.
+We work with discrete-time vectors and matrices throughout. The spatial domain is discretized into a set of points indexed by integers without implying any particular geometric arrangement. For instance, a 100×100 scan grid of a square plate yields 10,000 points labeled 1 through 10,000, with the specific mapping arbitrary, but fixed.
 
 When a transducer emits a signal at location $i$, represented by time-domain vector $\vec{s}_i$, the observed signal $\vec{m}_j$ at location $j$ is given by the convolution with the impulse response $\vec{g}_{ij}$ between those locations: $\vec{m}_j = \vec{g}_{ij} \ast \vec{s}_i$. This formulation separates spatial indices (subscripts) from the time-domain representation (vectors).
 
