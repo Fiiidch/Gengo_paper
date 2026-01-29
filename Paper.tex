@@ -1,0 +1,384 @@
+%% 
+%% Copyright 2019-2024 Elsevier Ltd
+%% 
+%% Version 2.4
+%% 
+%% This file is part of the 'CAS Bundle'.
+%% --------------------------------------
+%% 
+%% It may be distributed under the conditions of the LaTeX Project Public
+%% License, either version 1.2 of this license or (at your option) any
+%% later version.  The latest version of this license is in
+%%    http://www.latex-project.org/lppl.txt
+%% and version 1.2 or later is part of all distributions of LaTeX
+%% version 1999/12/01 or later.
+%% 
+%% The list of all files belonging to the 'CAS Bundle' is
+%% given in the file `manifest.txt'.
+%% 
+%% Template article for cas-dc documentclass for 
+%% double column output.
+
+%\documentclass[a4paper,fleqn,longmktitle]{cas-dc}
+\documentclass[a4paper,fleqn]{cas-sc}
+
+%\usepackage[authoryear,longnamesfirst]{natbib}
+%\usepackage[authoryear]{natbib}
+\usepackage[numbers]{natbib}
+\usepackage{comment} % Added for comment environment
+\usepackage{etoolbox} % Added for \csdef command
+\usepackage{xspace} % Added to support \xspace used in \tsc
+\usepackage{subcaption} % Added for subfigures
+
+
+%%%Author definitions
+\def\tsc#1{\csdef{#1}{\textsc{\lowercase{#1}}\xspace}}
+\tsc{WGM}
+\tsc{QE}
+\tsc{EP}
+\tsc{PMS}
+\tsc{BEC}
+\tsc{DE}
+
+% Define tblwidth if not already defined
+\providecommand{\tblwidth}{\textwidth}
+%%%
+
+\begin{document}
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
+\shorttitle{Vectorized Linear Operator Formulation for Inverse Scattering; Draft version 0.7}
+\shortauthors{R. G. Wueest et al.}
+
+\title [mode = title]{Fully Vectorized Linear Operator Formulation for Inverse Scattering Problems}                      
+
+
+\author[1]{R. G. Wueest}[type=editor,
+                        role=Researcher]
+\cormark[1]
+\fnmark[1]
+\ead{wueestg@ethz.ch}
+
+%\credit{Conceptualization, Methodology, Software, Formal analysis, Investigation, Visualization, Writing – original draft, Writing – review \& editing}
+
+%\address[1]{, Street 129, 1043 NX Amsterdam, The Netherlands}
+\affiliation[1]{organization={Department of Physics, ETH Zürich},
+%               citysep={}, % Uncomment if no comma needed between city and postcode
+                postcode={8092}, 
+                state={Zürich},
+                country={Switzerland}}
+
+\author[2]{J. Mueller}[role=Advisor]
+\credit{Writing - review \\\& editing}
+
+
+\affiliation[2]{organization={Department of Earth Sciences, ETH Zürich},
+                postcode={8092}, 
+                state={Zürich},
+           country={Switzerland}}
+
+% Additional advisors from thesis (placeholders where details absent)
+\author[2]{J. Aichele}[role=Advisor]
+\credit{Writing - review \& editing}
+
+
+\author[2]{H. R. Thomsen}[role=Advisor]
+\fnmark[2]
+\ead{thomsenh@ethz.ch}
+\credit{Supervision, Validation, Writing - review \& editing}
+
+
+\begin{abstract}
+We present an empirical, fully vectorized linear-operator framework for inverse scattering and validate it experimentally on a bidirectional carbon-fiber-reinforced polymer (CFRP) plate. The framework uses bonded piezoelectric transducers to emit periodic pulses and a Laser Doppler Vibrometer (LDV) for a one-time calibration scan, constructing source–receiver impulse-response operators. By enforcing a discrete, periodic time behavior, wave propagation is modeled as circular convolution, diagonalizable via the discrete Fourier transform (DFT). Defect localization is formulated as a Tikhonov-regularized linear inverse problem.
+
+After calibration, monitoring uses only sparse measurements at the transducer locations. An iron cube glued to the plate serves as a defect proxy and is localized to a sub wavelength resolution. Computation is concentrated in the one-time calibration; subsequent evaluations require minimal data and time. Long-term, transducer-only calibration could enable fully automated structural health monitoring, and the empirical-operator concept may extend to alternative detection systems or unconventional sensing interfaces (e.g., touch-like surfaces). The approach is model-free and broadly applicable where forward modeling or digital-twin upkeep is impractical.
+\end{abstract}
+
+\begin{graphicalabstract}
+
+\end{graphicalabstract}
+
+\begin{comment}
+\begin{graphicalabstract}
+\includegraphics{thumbnails/cas_email.jpeg}
+\end{graphicalabstract}
+\end{comment}
+
+\begin{highlights}
+\item Presents a fully vectorized linear operator framework for inverse scattering in NDT.
+\item Relies solely on the principles of linear time-invariant (LTI) systems, avoiding the need for theoretical assumptions about wave propagation.
+\item Enforces periodic discrete time, enabling FFT-diagonalizable circular convolution operators which are solvable using the Tikhonov regularized inverse.
+\item Localizes sub-wavelength sized defects in both simulated aluminum plates and real-world CFRP plates.
+\item Post-calibration, only sparse sensor measurements are needed for rapid health monitoring.
+\end{highlights}
+
+\begin{keywords}
+inverse scattering \sep non-destructive testing \sep ultrasonic NDT \sep defect localization \sep empirical impulse response \sep Tikhonov regularization \sep structural health monitoring
+\end{keywords}
+\maketitle
+\section{Introduction}\label{Introduction}
+Structural Health Monitoring (SHM) of engineered components aims to localize and characterize defects. The importance of which depends on the cost of failure, which is especially relevant in aviation, hence many methods of performing SHM on flat structures has been explored and documented. Among the methods, Piezoelectric sensors are promising from a commercial point of view due to their low cost, however increased challenges are noted when monitoring CFRP components \cite{Aircraft_NDT}. Methods for CFRP specifically are explored in \cite{Current_Methods}.
+
+Sparse monitoring using Piezoelectric sensors (measuring at a few strategically placed sensors) would be therefore be especially desirable, but it typically demands detailed numerical forward models that are difficult to build and maintain in composites \cite{Modelling_Challenges}. Carbon-fiber-reinforced polymer (CFRP) plates, in particular, exhibit variability from layup and manufacturing that undermines predictive digital twins \cite{Manufacturing_Variability_Problems}.
+
+This paper validates a model-free alternative based on empirical linear operators and a fundamentally periodic time embedding. We excite the structure with bonded piezoelectric transducers and use a Laser Doppler Vibrometer (LDV) to perform a dense, one-time calibration scan that constructs source–receiver impulse-response operators. Propagation is treated on a discrete cyclic time axis so that it acts as circular convolution, diagonalized by the discrete Fourier transform (DFT). 
+By designing the excitation to be strictly periodic and ensuring no other sources act on the object, the cyclic time embedding is valid by construction; we impose time periodic behavior in the setup, and thus the frequency treatment becomes equivalent to the time domain treatment.
+Within a single-scattering formulation, defect localization is solved via Tikhonov-regularized inverse\cite{Tikhonov} using only sparse monitoring data at the transducer locations. 
+
+We validate the approach experimentally on an anisotropic CFRP plate, demonstrating sub-wavelength localization from sparse measurements.
+
+
+\section{Methodology}
+The test specimen is a $25\,\mathrm{cm}\times25\,\mathrm{cm}$ bi-directional CFRP plate, $1.3\,\mathrm{mm}$ thick. Five ceramic piezoelectric transducers are bonded to the plate. They are excited using an 80\,kHz center-frequency Ricker wavelet pulse. An LDV scans the plate on a $104\times104$ grid, recording the out-of-plane velocity over time (see Figure~\ref{fig:Diag_LDV}). Figure~\ref{fig:Screenshot} shows one frame of such a measurement. This scan is repeated for each of the five transducers; these acquisitions constitute the one-time calibration step.
+
+Transducers are low-cost ceramic discs of $12\,\mathrm{mm}$ diameter. The drive is a periodic pulse train with a $2\,\mathrm{ms}$ repetition period, using the 80\,kHz Ricker wavelet as the pulse shape to enforce timing periodicity. Data are sampled at $625\,\mathrm{kHz}$ and low-pass filtered to the analysis band prior to operator estimation. Each grid location is acquired with 10 repeats; within each acquisition, a 5-pulse train (total duration $\approx10\,\mathrm{ms}$) is emitted. The five pulses are segmented and treated as distinct measurements to increase robustness of the empirical impulse-response estimation. Transducers were bonded using a hand-applied, temperature-activated adhesive; exact formulation and bond thickness were not recorded. It is not required, as the formalism only compared responses between points, so the coupling properties of the transducers are not important to know.
+
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\linewidth]{Figures/Misc/LDV_Diag.png}
+  \caption{Experimental setup: periodic excitation with a single active transducer; an LDV scans the plate to build empirical source--receiver operators during calibration. The source pulse is taken as the self-measured excitation (including local reverberations), and periodic timing is enforced by design.}
+  \label{fig:Diag_LDV}
+\end{figure}
+
+
+
+After calibration, a $1\,\mathrm{cm}^3$ iron cube is bonded to the plate to simulate a defect. During monitoring, we excite each transducer again but measure only at the transducer locations. In our setup, the LDV acquires these sparse responses at the transducer positions; in principle, the transducers themselves can act as receivers, enabling fully automated, remote NDT/SHM. See Appendix~\ref{Appendix_Piezoelectric} for additional discussion of piezoelectric sensing considerations.
+
+To characterize the plate, we estimate its dispersion. We extract an x--t slice along the axis through the active transducer from Figure~\ref{fig:Screenshot}, window the time axis to exclude edge reflections (Figure~\ref{fig:Dispersion:b}), and compute a 2D FFT to obtain the $k$--$\omega$ spectrum. Selecting the peak-energy wavenumber $k^*(f)$ for each frequency yields the phase velocity $v_p(f)=2\pi f/k^*(f)$ and wavelength $\lambda(f)=2\pi/k^*(f)$ (Figure~\ref{fig:Dispersion:a}).
+
+
+
+
+
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\linewidth]{Figures/Misc/LDV_Diag.png}
+  \caption{Snapshot of the CFRP plate excitation. TODO: Alle Sensor locations rein plotten}
+  \label{fig:Screenshot}
+\end{figure}
+
+\begin{figure}
+
+  \begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Dispersion_curve/space_time_slice_src5_xaxis.png}
+    \caption{Raw LDV space--time slice along the x-direction through the active transducer. }
+    \label{fig:Dispersion:b}
+  \end{subfigure}\hfill
+  \centering
+  \begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Dispersion_curve/dispersion_dual_axis_src5_xaxis.png}
+    \caption{Phase velocity $v_p$ (blue, left axis, m/s) and wavelength $\lambda$ (red, right axis, mm) versus frequency $f$ (kHz). }
+    \label{fig:Dispersion:a}
+  \end{subfigure}
+  
+  \caption{Empirical dispersion of the CFRP plate from the calibration scan.}
+  \label{fig:Dispersion}
+\end{figure}
+
+\section{Mathematical framework}\label{Mathematical framework}
+\subsection{System assumptions}\label{System assumptions}
+We assume: (i) linearity; (ii) time invariance; (iii) reciprocity; (iv) practical flatness (LDV access); and (v) the ability to control the excitation of the material relative to noise.
+
+Assumptions (i), (ii), and (iii) are naturally satisfied for mechanical waves under standard physical conditions. Assumption (iv) refers to geometries where the object thickness is small relative to its lateral dimensions, typically valid for plate-like components such as aircraft fuselage panels and shell structures. Assumption (v) simply requires controlled excitation capability, which is standard in active NDT configurations using piezoelectric or electromagnetic transducers.
+
+\subsection{Terminology and Notation}
+We work with discrete-time vectors and matrices throughout. The spatial domain is discretized into a set of points indexed by integers without implying any particular geometric arrangement. For instance, a 100×100 scan grid of a square plate yields 10,000 points labeled 1 through 10,000, with the specific mapping arbitrary but fixed.
+
+When a transducer emits a signal at location $i$, represented by time-domain vector $\vec{s}_i$, the observed signal $\vec{m}_j$ at location $j$ is given by the convolution with the impulse response $\vec{g}_{ij}$ between those locations: $\vec{m}_j = \vec{g}_{ij} \ast \vec{s}_i$. This formulation separates spatial indices (subscripts) from the time-domain representation (vectors).
+
+For computational implementation, these vectors correspond to discrete-time samples over a fixed acquisition window, with all operations respecting the imposed periodicity described in subsequent sections.
+
+
+\subsection{Periodic time and discrete representation}\label{Periodic time and discrete representation}
+
+Repeating the excitations enforces periodicity so that the time axis can be treated on a discrete cyclic domain. Any impulse response between locations $i$ and $j$ is then a circular-convolution operator $G_{ij}$, represented by a circulant (circular Toeplitz) matrix fully determined by its first column (the sampled impulse-response vector $\vec g_{ij}$). Explicitly, for $\vec g_{ij} = (g_0, g_1, \ldots, g_{n-1})^T$,
+\begin{equation}
+G_{ij} = \begin{pmatrix}
+g_0 & g_{n-1} & \cdots & g_1 \\
+g_1 & g_0 & \cdots & g_2 \\
+\vdots & \vdots & \ddots & \vdots \\
+g_{n-1} & g_{n-2} & \cdots & g_0
+\end{pmatrix}
+\end{equation}
+so that $G_{ij}\vec v = \vec g_{ij} * \vec v$ (circular convolution). All such operators are diagonalized by the discrete Fourier transform (DFT), enabling component-wise multiplication in frequency.
+
+
+
+\subsection{Empirical impulse responses}\label{Empirical impulse responses}
+We do not separate an ``ideal'' injected waveform from local reverberations at a transducer. The self-measured periodic signal $\vec s_s$ is taken as the source vector. For a transducer $s$ and measurement point $i$ (grid or other transducer), the response is modeled as a circular convolution:
+\begin{equation}\label{eq:empirical_conv}
+\vec m_{i} = G_{is} \vec s_s
+\end{equation}
+where $G_{is}$ is circulant (first column $\vec g_{is}$). Directional (mode) decomposition is intentionally omitted because the LDV records only the scalar out-of-plane velocity at each sampled point.
+
+To robustly estimate $\vec g_{is}$, we use repeated measurements. Let $\{(\vec s_{s,p}, \vec m_{i\mid s,p})\}_{p=1}^P$ denote $P$ repeated acquisitions. In the frequency domain (hats denote DFT components), for each frequency bin $f$ we solve the Tikhonov-regularized least-squares problem:
+\begin{equation}\label{Tikhonov_impulse}
+\min_{\hat{g}_{is}(f)} \sum_{p=1}^P \left| \hat{m}_{i\mid s,p}(f) - \hat{s}_{s,p}(f) \hat{g}_{is}(f) \right|^2 + \alpha |\hat{g}_{is}(f)|^2
+\end{equation}
+with regularization parameter $\alpha > 0$. The closed-form solution is:
+\begin{equation}
+\hat{g}^{\mathrm{reg}}_{is}(f) = \frac{\sum_p \overline{\hat{s}_{s,p}(f)}\, \hat{m}_{i\mid s,p}(f)}{\sum_p |\hat{s}_{s,p}(f)|^2 + \alpha}
+\end{equation}
+The result is a stabilized impulse-response function that does not rely on assuming specific noise characteristics.
+
+\textbf{Notes:} Although the framework is presented with LDV-acquired empirical impulse responses, the same operators $G_{ij}$ can be generated computationally from an analytical model or a digital twin (e.g., FEM/FDTD). In that case, emitter and receiver coupling, as well as the enforced periodicity, must be accounted for separately. 
+
+
+\subsection{Defect model}\label{Defect model}
+Since defects also satisfy the assumptions in Section~\ref{System assumptions}, their effects can be modeled using circular convolutions. Within the single-scattering (Born-type) approximation, the scattering process is illustrated in Fig.~\ref{fig:Diag}. For clarity, we first assume a \emph{delta-like} (instantaneous) temporal reflection kernel, so each defect is represented by a scalar amplitude $d_k$ at its spatial location. Algebraically, this corresponds to selecting only the first canonical temporal basis vector $\vec e_0$. This is a \textbf{defect-basis choice} made for pedagogical clarity, not a limitation of the framework. The generalization to richer local bases is presented in Section~\ref{Generalization to arbitrary defect bases} after the main operator assembly and inversion.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\linewidth]{Figures/Misc/diagram.png}
+  \caption{Visualization on how a source at location $j$ propagates to a defect at location $k$, which then re-emits the wave. Afterwards, it propagates to a receiver location $i$. As an equation, the image visualizes $\vec{m}_i = \vec{g}_{kj}\ast\vec{d}_k\ast\vec{g}_{ik}\ast\vec{s}_j$.}
+  \label{fig:Diag}
+\end{figure}
+
+
+
+\subsection{Operator assembly}\label{Operator assembly}
+For an emitter at $j$ and a measurement at $i$, the measured signal consists of a direct propagation term and first-order (single-scattered) contributions, as illustrated in Fig.~\ref{fig:Diag}:
+\begin{equation}
+\vec m_i = \vec{g}_{ij}\ast\vec s_j + \sum_{k=1}^N \vec{g}_{ik} \ast \vec{d}_k \ast\vec{g}_{kj}\ast \vec s_j.
+\end{equation}
+Which can be rewritten in matrix form:
+\begin{equation}
+\vec m_i = G_{ij}\vec s_j + \sum_{k=1}^N G_{ik} D_k G_{kj} \vec s_j.
+\end{equation}
+
+Using the commutativity of circular convolution, restate the problem as
+\begin{equation}
+\Delta \vec m_{ij} := \vec m_i - G_{ij}\vec s_j = \sum_{k=1}^N (G_{ik} G_{kj} S_j)\, \vec{d}_k.
+\end{equation}
+
+Writing the defect vectors $\vec{d}_k$ as a single vector:
+\begin{equation}
+\vec{\mathbf{d}}_{\mathrm{full}} := \begin{bmatrix} \vec{d}_1 \\ \vec{d}_2 \\ \vdots \\ \vec{d}_N \end{bmatrix}
+\end{equation}
+
+The problem can be restated as a matrix problem with
+
+\begin{equation}
+L^{\mathrm{gen}}_{ij} := \big[\; G_{i1} G_{1j} S_j \;\big|\; G_{i2} G_{2j} S_j \;\big|\; \cdots \;\big|\; G_{iN} G_{Nj} S_j \big]
+\end{equation}
+so that
+\begin{equation}
+\Delta \vec m_{ij} = L^{\mathrm{gen}}_{ij}\, \vec{\mathbf{d}}_{\mathrm{full}}.
+\end{equation}
+This system is typically massively under determined, and even if not too massive for practical computing.
+
+However, knowing that scatterers generally re-emit waves almost immediately, we can restrict the defect vectors $\vec d_k$ around a small set of temporal basis functions. As mentioned in the previous section, we continue with the simplest case where $\vec{d}_k = d_k * \vec{e}_0$, i.e., a 1D basis. Since every defect at any location is parameterized by a single parameter $d_k$, the full defect vector can be represented as
+
+\begin{equation}
+\vec{\mathbf{d}} := \begin{bmatrix} d_1 \\ d_2 \\ \vdots \\ d_N \end{bmatrix}
+\end{equation}
+and integrated into the problem by including the basis vectors into the problem:
+
+
+\begin{equation}\label{L_Matrix_short}
+L_{ij} := \big[\; G_{i1} G_{1j} S_j \vec e_0 \;\big|\; G_{i2} G_{2j} S_j \vec e_0 \;\big|\; \cdots \;\big|\; G_{iN} G_{Nj} S_j \vec e_0 \big],
+\end{equation}
+
+where $\vec{e}_0$ in this equation is to be understood as a column vector. The final problem statement is then
+\begin{equation}\Delta \vec m_{ij} = L_{ij} \vec{\mathbf{d}}.
+\end{equation}
+
+Stacking the selected $(i,j)$ pairs yields the global residual system
+\begin{equation}\label{full_system}
+\mathbf{m}_{\mathrm{full}} = L_{\mathrm{full}} \vec{\mathbf{d}},
+\end{equation}
+Here, "stacking" means vertically concatenating the pairwise residual vectors and their corresponding block-row operators, e.g.,
+\[
+\mathbf{m}_{\mathrm{full}} =
+\begin{bmatrix}
+\Delta \vec m_{1 2} \\
+\Delta \vec m_{1 3} \\
+\vdots
+\end{bmatrix},\qquad
+L_{\mathrm{full}} =
+\begin{bmatrix}
+L_{1 2} \\
+L_{1 3} \\
+\vdots
+\end{bmatrix}
+\]
+How the stacking is performed in practice depends on how many sensors/emitters are available and how the system is set up.
+
+We have reduced the problem statement to the linear system in \eqref{full_system}. The only approximations made are the discretization of space and the assumption of first-order scattering.
+
+
+\subsection{Regularized inversion}\label{Regularized inversion}
+Let $\mathcal{L} = L_{\mathrm{full}}$ and $\mathbf{m} = \mathbf{m}_{\mathrm{full}}$. We estimate the defect vector by minimizing the penalized least-squares functional. 
+\begin{equation}\label{eq:objective}
+J(\mathbf{d}) = \|\mathcal{L}\mathbf{d} - \mathbf{m}\|_2^2 + \lambda \| \Gamma^{1/2} \mathbf{d} \|_2^2,
+\end{equation}
+where $\Gamma \succeq 0$ specifies the penalty metric (a weighting / masking matrix) and $\lambda>0$ controls the trade-off between data fit and stabilization. The normal equations yield the closed form
+\begin{equation}\label{eq:tik_gamma}
+\hat{\mathbf{d}} = (\mathcal{L}^T \mathcal{L} + \lambda \Gamma)^{-1} \mathcal{L}^T \mathbf{m}.
+\end{equation}
+In practice $\Gamma$ is diagonal with ones everywhere except zeros at transducer locations, so those coefficients are unpenalized. This allows the inversion to self-correct for slight inconsistencies in the emitter pulse form.
+
+
+% Dispersion figure moved to Section \ref{sec:plate-characterization}
+
+\section{Results}\label{Results (simulation study)}
+
+
+\section{Discussion}\label{Discussion}
+
+
+\section{Conclusion}\label{Conclusion}
+
+\appendix
+\section{My Appendix}\label{My Appendix}
+\subsection{Previous Results based on Simulations}\label{Appendix_Simulation_Results}
+TODO
+
+\subsection{Piezoelectric Measuring}\label{Appendix_Piezoelectric}
+
+\subsection{Computational aspects}\label{Computational aspects}
+Due to the large amounts of data involved, it is necessary to save intermediate data to disk and load sections as needed. The HDF5 file format is useful for this application.
+
+The Tikhonov inversion in \eqref{eq:tik_gamma} has been implemented by explicitly computing the matrix term and saving it. While this allows future measurements to use only a fast matrix multiplication, for increasingly large sizes it may become necessary to compute the result iteratively and out of core.
+
+
+\subsection{Generalization to arbitrary defect bases}\label{Generalization to arbitrary defect bases}
+As mentioned in Section \ref{Defect model} and applied in Section \ref{Operator assembly}, we assumed the defect to act as a perfect reflector of form $\vec{e}_0$. In general this assumption does not hold for more complicated defects, such as delaminations in fiber-reinforced materials. In this case, using a simulation with a defect at a known location, one can compute the response nature through similar means to those described in Sections \ref{Operator assembly} and \ref{Regularized inversion}.
+Assuming we have obtained empirical defect vectors for two defect types of interest, $\vec{b}_1$ and $\vec{b}_2$, we can implement these two vectors as a basis using a projector matrix $P$:
+\begin{equation}
+  P := \begin{bmatrix}
+    \vec{b}_1 & \vec{b}_2
+  \end{bmatrix}
+\end{equation}
+Replacing $\vec{e}_0$ in \eqref{L_Matrix_short}, we obtain
+\begin{equation}
+L_{ij} := \big[\; G_{i1} G_{1j} S_j P \;\big|\; G_{i2} G_{2j} S_j  P \;\big|\; \cdots \;\big|\; G_{iN} G_{Nj} S_j  P \big],
+\end{equation}
+as well as an adjustment to the full defect vector $\mathbf{d}$ to hold two parameters per location.
+
+\begin{equation}
+\mathbf{d} := \begin{bmatrix} d_{1,1} \\ d_{1,2} \\ d_{2,1} \\\vdots \\ d_{N,2} \end{bmatrix}
+\end{equation}
+where for $d_{k,b}$, $k$ denotes the grid location, and $b$ the basis vector at that location.
+
+
+%\printcredits
+
+%% Loading bibliography style file
+%\bibliographystyle{model1-num-names}
+\bibliographystyle{cas-model2-names}
+
+% Loading bibliography database
+\bibliography{cas-refs}
+
+
+%\vskip3pt
+
+
+\end{document}
+
