@@ -6,6 +6,7 @@ using HDF5
 using FFTW
 using LinearAlgebra
 using Plots
+using Statistics
 
 # Parameters
 data_freq = 625_000   # Sampling frequency in Hz
@@ -251,19 +252,21 @@ Plot the space-time slice showing wave propagation along x or y axis, and comput
 # Returns
 - Combined plot with space-time slice and dispersion curve
 """
-function plot_space_time_slice(source::Int, axis::String; n_points::Int=104, time_range=nothing, space_range=nothing, freq_range=nothing)
+function plot_space_time_slice(source::Int, axis::String; n_points::Int=104, time_range=nothing, space_range=nothing, freq_range=nothing, window::Int=2)
     # Extract the slice data (averaged over all 5 measurements)
     slice_data, positions, indices = extract_axis_slice(source, axis, n_points=n_points, time_range=time_range, space_range=space_range)
     
     # Determine actual ranges for axes
     actual_time_range = isnothing(time_range) ? (0, 2) : time_range
-    actual_space_range = isnothing(space_range) ? (0, 0.25) : space_range
+    # Derive space range from the measured sensor positions when not provided
+    actual_space_range = isnothing(space_range) ? (minimum(positions), maximum(positions)) : space_range
     
-    # Create space and time axes
-    space_axis = range(actual_space_range[1], actual_space_range[2], length=size(slice_data, 2))
+    # Use the actual sensor positions for the space axis (compensates for
+    # imperfect/non-uniform grid spacing). Time axis remains evenly spaced in ms.
+    space_axis = positions
     time_axis = range(actual_time_range[1], actual_time_range[2], length=size(slice_data, 1))
-    
-    # Create the space-time heatmap
+
+    # Create the space-time heatmap (high-res)
     plt1 = heatmap(space_axis, time_axis, slice_data,
         xlabel="Position along $(uppercase(axis))-axis [m]",
         ylabel="Time [ms]",
@@ -271,7 +274,29 @@ function plot_space_time_slice(source::Int, axis::String; n_points::Int=104, tim
         colorbar_title="\n Unitless Velocity",
         aspect_ratio=:auto,
         c=:seismic,
-        right_margin=5Plots.mm)
+        right_margin=5Plots.mm,
+        dpi=300)
+
+    # Draw a vertical line at the source sensor location using the nearest
+    # sensor index within the extracted slice. This compensates for imperfect
+    # grid spacing by mapping the matched sensor index to the plotted coordinate.
+    try
+        # Get matched source position from global sensor_locations
+        src_pos = sensor_locations[source]
+        vary_idx = axis == "x" ? 1 : 2
+        src_coord = src_pos[vary_idx]
+
+        if length(positions) > 0
+            # positions is the vector of selected sensor coordinates along the slice
+            nearest_local_idx = argmin(abs.(positions .- src_coord))
+            # Map the local index to the space_axis coordinate used in the heatmap
+            line_x = space_axis[nearest_local_idx]
+            vline!(plt1, [line_x], color=:black, linewidth=2, linestyle=:dash, label="Active transducer location")
+            println("Drew source line at space coordinate: ", round(line_x, digits=5), " (slice index: ", nearest_local_idx, ")")
+        end
+    catch e
+        @warn "Could not draw source line on space-time plot: $e"
+    end
     
     # Compute 2D FFT for dispersion curve
     fft_2d = fftshift(fft(slice_data))
@@ -292,6 +317,25 @@ function plot_space_time_slice(source::Int, axis::String; n_points::Int=104, tim
     freq_positive_idx = freq_axis .>= 0
     freq_positive = freq_axis[freq_positive_idx]
     fft_positive_freq = fft_magnitude[freq_positive_idx, :]
+
+    # Smooth the FFT along the spatial-frequency (k) axis by averaging
+    # neighbouring spectral bins. `window` is an integer >= 1. We interpret
+    # `window == 1` as no smoothing; `window == 2` averages each bin with its
+    # immediate neighbours (radius = window - 1).
+    radius = max(0, window - 1)
+    if radius > 0
+        (Nf, Nk) = size(fft_positive_freq)
+        fft_smoothed = similar(fft_positive_freq)
+        for fi in 1:Nf
+            for kj in 1:Nk
+                lo = max(1, kj - radius)
+                hi = min(Nk, kj + radius)
+                fft_smoothed[fi, kj] = mean(fft_positive_freq[fi, lo:hi])
+            end
+        end
+    else
+        fft_smoothed = fft_positive_freq
+    end
     
     # Find peak wavenumber for each frequency
     phase_velocities = Float64[]
@@ -303,8 +347,8 @@ function plot_space_time_slice(source::Int, axis::String; n_points::Int=104, tim
         in_range = isnothing(freq_range) ? true : (freq_positive[i] >= freq_range[1] && freq_positive[i] <= freq_range[2])
         
         if freq_positive[i] > 0.1 && in_range  # Skip very low frequencies (noise) and apply range
-            # Find peak in wavenumber for this frequency
-            max_idx = argmax(fft_positive_freq[i, :])
+            # Find peak in wavenumber for this frequency (use smoothed spectrum)
+            max_idx = argmax(fft_smoothed[i, :])
             k_peak = abs(k_axis[max_idx])
             
             if k_peak > 0.01  # Skip near-zero wavenumbers
@@ -336,6 +380,7 @@ function plot_space_time_slice(source::Int, axis::String; n_points::Int=104, tim
                 markersize=4,
                 markerstrokewidth=0,
                 xlims=actual_freq_range,
+                dpi=300,
                 grid=true)
     
     # Add invisible dummy series for wavelength to appear in same legend
@@ -363,7 +408,7 @@ function plot_space_time_slice(source::Int, axis::String; n_points::Int=104, tim
           grid=true)
     
     # Combine plots (space-time and dual-axis dispersion)
-    plt = plot(plt1, plt2, layout=(1, 2), size=(1400, 500))
+    plt = plot(plt1, plt2, layout=(1, 2), size=(1400, 500), dpi = 300)
     
     println("\nPlots created: Space-Time slice and Dispersion Curve (dual-axis) along $axis-axis")
     
@@ -389,7 +434,7 @@ println("\nX-axis slice extracted!")
 println("Slice data shape: ", size(slice_data_x))
 
 # Example: Plot space-time slice with time range 0.08 to 0.17 ms and frequency range 1-150 kHz
-plt_x = plot_space_time_slice(selected_source, "x", time_range=(0.08, 0.17), freq_range=(1, 150))
+plt_x = plot_space_time_slice(selected_source, "x", time_range=(0.08, 0.17), freq_range=(1, 100))
 display(plt_x)
 
 
