@@ -156,7 +156,7 @@ To characterize the plate, we estimate its dispersion. We extract an x--t slice 
 \begin{figure}
   \centering
   \includegraphics[width=0.5\linewidth]{Figures/Raw_data/150khz_0.17ms.png}
-  \caption{Snapshot of the CFRP plate excitation, at 150khz low pass filtering. Locations of all transducers are designated in red and numbered from 1-5. In this case, transducer 5 is firing.}
+  \caption{Snapshot of the CFRP plate excitation, with an applied 1-150khz Bandpass filtering. Locations of all transducers are designated in red diamonds and numbered from 1-5. In this case, transducer 5 is firing.}
   \label{fig:Screenshot}
 \end{figure}
 
@@ -165,7 +165,7 @@ To characterize the plate, we estimate its dispersion. We extract an x--t slice 
   \begin{subfigure}{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{Figures/Dispersion_curve/space_time_slice_src5_xaxis.png}
-    \caption{Raw LDV space--time slice along the x-direction through the active transducer. }
+    \caption{Raw LDV space--time slice along the x-direction through the active transducer 5,  at y = 0.062. See Figure \ref{fig:Screenshot}}
     \label{fig:Dispersion:b}
   \end{subfigure}\hfill
   \centering
@@ -180,11 +180,15 @@ To characterize the plate, we estimate its dispersion. We extract an x--t slice 
   \label{fig:Dispersion}
 \end{figure}
 
+
+
+
+
 \section{Mathematical framework}\label{Mathematical framework}
 \subsection{System assumptions}\label{System assumptions}
 We assume: (i) linearity; (ii) time invariance; (iii) reciprocity; (iv) practical flatness (LDV access); and (v) the ability to control the excitation of the material relative to noise.
 
-Assumptions (i), (ii), and (iii) are naturally satisfied for mechanical waves under standard conditions. Assumption (iv) refers to geometries where the object thickness is small relative to its lateral dimensions, typically valid for plate-like components such as aircraft fuselage panels and shell structures. Assumption (v) simply requires controlled excitation capability, which is standard in active NDT configurations using piezoelectric or electromagnetic transducers.
+Assumptions (i), (ii), and (iii) are naturally satisfied for mechanical waves under standard conditions. Assumption (iv) refers to geometries where the object thickness is small relative to its lateral dimensions, typically valid for plate-like components such as aircraft fuselage panels and shell structures. Assumption (v) simply requires controlled excitation capability, which is standard in active SHM configurations using piezoelectric transducers.
 
 \subsection{Terminology and Notation}
 We work with discrete-time vectors and matrices throughout. The spatial domain is discretized into a set of points indexed by integers without implying any particular geometric arrangement. For instance, a 100×100 scan grid of a square plate yields 10,000 points labeled 1 through 10,000, with the specific mapping arbitrary, but fixed.
