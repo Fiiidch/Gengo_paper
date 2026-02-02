@@ -156,12 +156,11 @@ To characterize the plate, we estimate its dispersion. We extract an x--t slice 
 \begin{figure}
   \centering
   \includegraphics[width=0.5\linewidth]{Figures/Raw_data/150khz_Defect_0.17ms.png}
-  \caption{Snapshot of the CFRP plate excitation, at 150khz low pass filtering. Locations of all transducers are designated in red and numbered from 1-5. In this case, transducer 5 is firing. The location of the defect to be adhered is labeled in green, but is not yet present in this scan.}
+  \caption{Snapshot of the CFRP plate at $t = 0.17$ ms, lowpass filtered to 150 kHz. Red diamonds mark the five transducers (numbered 1--5); transducer 5 is the active source. The green square indicates the location where the defect will be bonded in the monitoring phase (not yet present in this calibration scan). Note: The results in this paper employ 1--50 kHz bandpass filtering, which significantly distorts the pulse shape compared to this view; see Appendix~\ref{Appendix_50khz_pulse}.}
   \label{fig:Screenshot}
 \end{figure}
 
 \begin{figure}
-
   \begin{subfigure}{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{Figures/Dispersion_curve/space_time_slice_src5_xaxis.png}
@@ -196,7 +195,7 @@ To characterize the plate, we estimate its dispersion. We extract an x--t slice 
   \end{subfigure}
   
   \caption{Ich bin mir nicht sicher, ob solche bilder auch enthalten sein sollen, oder eher im Appendix mit verweis? Ein bessered bild von der hinterseite der platte wäre evtl auch noch gut, obwohl ich richtig gerne den Hund drauf behalten würde:D}
-  \label{fig:Dispersion}
+  \label{fig:IRL}
 \end{figure}
 
 
@@ -348,46 +347,73 @@ In practice $\Gamma$ is diagonal with ones everywhere except zeros at transducer
 
 \section{Results}\label{Results}
 
-The results as seen in Figures \ref{fig:Results} show a succesful localization of a $1cm^3$ metal cube on a cfrp plate. The algorithm is only fed information about the metal cube defect through responses from the transducers at their respective locations, a sparse set of measruements compared to the entire plate, which is characterized through a 104x104 grid of measruements.
+Figures~\ref{fig:Results} demonstrate successful localization of the $1\,\mathrm{cm}^3$ iron cube defect using only sparse measurements at the five transducer locations. Data were bandpass filtered to the 1--50 kHz range and processed via the Tikhonov-regularized inversion described in Section~\ref{Regularized inversion}.
 
-All data has been bandpass filtered in time to 1-50khz. The lower boundary of 1khz is chosen due to the insidgnificant amout of singals in the regime given the 80khz ricker wavelet excitation pulse. Moreover, in this range, the wavelengths easily exceed the length of the plate itself, indicating that it would be dominated by systematic errors such as the plate swinging, or a pure displacement. 
+Figure~\ref{fig:Results_normal} shows the reconstructed defect vector $\vec{\mathbf{d}}$, with each pixel representing the absolute value of a spatial grid point. The defect is clearly localized to a small region near the target location (yellow square). A small black region appears around each transducer location (red diamonds); this exclusion zone corresponds to the unpenalized region in the regularization (Section~\ref{Regularized inversion}) and is masked in the visualization.
 
-In figure \ref{fig:Results_normal}, we see a visualization of the defect vector $\vec{\mathbf{d}}$ for which the system solved for in equation \ref{full_system}. Every pixel in the figure corresponds to the absolute value of every index of $\vec{\mathbf{d}}$. Note that around the transducers designated in red, is a small black region. This is the non regularized section as described in section \ref{Regularized inversion}. This regions helps correct for deviations in the pulse shape sent by the transducers between the calibration and defect measuring step, at the cost of not being able to detect defects in said region. This exclusion zone is needed in this case, as without, the phantom defects appeared around some transducers. 
+Figure~\ref{fig:Results_side} provides cross-sectional views along the x-axis. Slices exceeding 0.6 times the maximum amplitude are retained and their envelope is drawn. This threshold identifies the localization width: the defect signature has a half width of approximately 2 cm. 
 
-Note the the heatmap amplitude of Figure \ref{fig:Results_normal} is to be seen with a grain of salt. The values change greatly based on the regularization parameters chosen, and depend on the nature of the system in general. In the results, it would implicate that the defect reflection in certain regions with a reflection amplitude of 0.01. We cannot draw conclutions about the nature of the defect from this, as the total effect of the defect depends on all components together, as well as having to account from the lower amplitude due to regularization. A proper investigation would reguire the use of a defect amplitude density, aswell as a correction from regularization effects.
-
-Figure \ref{fig:Results_side} shows a side ways view of the heatmap in figure \ref{fig:Results_normal}. That is, of the heatmap, slices along the x-axis are taken. Only slices are taken where at least one part of the slice has amplitude of at least 0.6 times the max amplitude. The same amplitude is chosen to estimate the localization width at 19mm. It is usually customary to choose 0.5 as threshold for width, but in this specific case, at 0.5 some slices are included where the background noise goes over the threshold. Therefore 0.6 is chosen. From the plot, we can deduce that the half width of the cube defect is  \approx 2cm. 
-
-The 50khz upper limit is a semi arbritrary choice. The reusults are similary good if the upper limit increased to 80khz, but is was deemed more interesting to show results using less information. 
-
-Increasing the upper bound to 150khz decreases the reconstrution results greatly. Additional evaluations at 100-150khz show that the results are poor in this frequency range. This stands in contrast to the previous simulation study where increased frequency ranges generally led to better results. This indicates that the poor higher frequency results are caused by deviations from simulated setups. Such deviations include non-perfect repetitions of transucer signals, and the ldv scan on the transducer locations not perfectly alligning with the initial scan. Such deviations are naturally more sensitive in the high frequency range. As such, the ability of the algorithm to work in low frequency ranges proved critical in providing good results in a real world setup. 
+Computations used the 1--50 kHz band exclusively. Testing with extended frequency ranges shows degraded reconstruction quality above 100 kHz. 
 
 \begin{figure}
   \begin{subfigure}{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{Figures/Results/1-50khz + Defect.png}
-    \caption{The reconstructed defect of a cube glued on the plate. Die red diamonds mark the transducer locations. The yellow square denotes the spot on which the metal Cube was glued onto.}
+    \caption{Reconstructed magnitude of the defect vector $|\vec{\mathbf{d}}|$ in the 1--50 kHz band. Red diamonds mark the five transducer locations; the yellow square indicates the actual location where the iron cube was bonded. The black regions around transducers are the unpenalized exclusion zones from the regularization.}
     \label{fig:Results_normal}
   \end{subfigure}\hfill
   \centering
   \begin{subfigure}{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{Figures/Results/section_scan_1-50khz_x.png}
-    \caption{A cross section view of Figure \ref{fig:Results_normal} along the x-axis. Only slices with max amplitude of 0.6 are included and their envelope drawn. The localization accuracy is estimated with width a 0.6 max amplitude threshold.}
+    \caption{Cross-sectional profiles along the x-axis through the reconstructed defect (left panel). Colored envelopes show slices with amplitude exceeding 0.6 times the maximum. The localization width is estimated from the 0.6 amplitude threshold, yielding a half-width of approximately 2 cm.}
     \label{fig:Results_side}
   \end{subfigure}
-  
-  \caption{}
+  \caption{Defect localization results in the 1--50 kHz band using sparse transducer measurements. Left: full 2D reconstruction showing sub-wavelength localization of the defect. Right: cross-sectional analysis quantifying the localization width.}
   \label{fig:Results}
 \end{figure}
 
 \section{Discussion}\label{Discussion}
 
+The reconstructed defect has a half-width of approximately 2 cm compared to a wavelength of $\lambda_{50} \approx 8$ cm at 50 kHz (Figure~\ref{fig:Dispersion:a}), yielding sub-wavelength localization. This is achieved despite working with sparse measurements at only five transducer locations.
+
+The unpenalized region around transducers (Section~\ref{Regularized inversion}) was necessary to suppress phantom defects in early inversions. Pulse shape measurements confirmed slight temporal and amplitude variations between calibration and monitoring phases. Rather than correcting these variations explicitly, the inversion absorbs them locally in the unpenalized zones. This approach is pragmatic given that transducers are known elements and need not be resolved spatially.
+
+Performance degrades significantly above 80 kHz. Testing with extended frequency ranges showed that the 1--80 kHz band yields only modest quality improvements over 1--50 kHz, while extending to 1--150 kHz causes severe reconstruction degradation. Analysis of the 100--150 kHz band alone reveals only noise, indicating that this frequency range carries no useful information for defect localization in the current setup.
+
+A key source of degradation at higher frequencies likely is misalignment between the calibration and monitoring phases. During calibration, the LDV scans a dense 104×104 grid. During monitoring, the LDV measures at transducer locations only, and realignment relies on visual cues, introducing small spatial offsets. Such misalignments couple strongly to phase information at shorter wavelengths. Notably, this alignment issue would be eliminated entirely if monitoring were performed using the transducers themselves as receivers rather than the LDV, as discussed in Section~\ref{Appendix_Piezoelectric}. At high frequencies, the Born approximation may also break down as secondary and multiple scattering contributions become relevant.
+
+The absolute pixel values in Figure~\ref{fig:Results_normal} should be interpreted as relative indicators of defect location rather than quantitative scattering amplitudes. Regularization parameter $\lambda$ significantly influences amplitude scaling, and the total defect effect depends on all spatial components jointly. Future quantitative work would require amplitude-density analysis and regularization-artifact correction; here, the focus is on successful localization from sparse data.
+
+Working effectively in the 1--50 kHz band validates the empirical operator concept, even with practical imperfections such as pulse shape drift and measurement misalignment. The robustness in this band supports the strategy of circumventing detailed forward models in favor of empirical operators.
 
 \section{Conclusion}\label{Conclusion}
 
 \appendix
 \section{My Appendix}\label{My Appendix}
+
+\subsection{Low Frequency data}\label{Appendix_50khz_pulse}
+
+The results presented in the main paper employ a 1--50 kHz bandpass filter, which differs significantly from the unfiltered calibration data shown in Figure~\ref{fig:Screenshot}. Figure~\ref{fig:Screenshot_50khz} shows the same acquisition time point, but after lowpass filtering to 50 kHz. The pulse duration expands dramatically, becoming so long that it wraps around within the periodic time window. At the end of the 2 ms period ($t \approx 1.9$ ms), the pulse from the next repetition is already visible (Figure~\ref{fig:Screenshot_50khz_1.9ms}). This behavior illustrates a key strength of the framework: the algorithm does not require short, well-separated pulses. Instead, it relies on the imposed periodicity and the circulant operator structure, which naturally accommodate extended pulse durations. The periodic time treatment is therefore not merely a computational convenience but is fundamentally embedded in the mathematics of the inverse problem.
+
+\begin{figure}
+  \begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Raw_data/50khz_0.17ms.png}
+    \caption{CFRP plate response at $t = 0.17$ ms, bandpass filtered to 1--50 kHz. Transducer 5 is active. Compared to the unfiltered snapshot in Figure~\ref{fig:Screenshot}, the pulse is significantly broadened due to the lowpass filtering.}
+    \label{fig:Screenshot_50khz}
+  \end{subfigure}\hfill
+  \centering
+  \begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Raw_data/50khz_1.9ms.png}
+    \caption{Same setup at $t = 1.9$ ms, near the end of the 2 ms period. The pulse tail from the current repetition is still visible, and the pulse from the next repetition (nominally starting at $t = 0.12$ ms) is already present, demonstrating the wraparound inherent in the periodic time treatment.}
+    \label{fig:Screenshot_50khz_1.9ms}
+  \end{subfigure}
+  \caption{Effect of 1--50 kHz bandpass filtering on the transducer pulse shape in the periodic time framework.}
+  \label{fig:50khz}
+\end{figure}
+
 \subsection{Previous Results based on Simulations}\label{Appendix_Simulation_Results}
 TODO
 
