@@ -185,14 +185,14 @@ To characterize the plate, we estimate its dispersion. We extract an x--t slice 
     \centering
     \includegraphics[width=\linewidth]{Figures/IRL/LDV_Frontal.jpeg}
     \caption{LDV setup from the front}
-    \label{fig:Dispersion:b}
+    \label{fig:LDV_Front}
   \end{subfigure}\hfill
   \centering
   \begin{subfigure}{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{Figures/IRL/LDV_Back_DOG.jpeg}
     \caption{LDV Setup from the back}
-    \label{fig:Dispersion:a}
+    \label{fig:LDV_Back}
   \end{subfigure}
   
   \caption{Ich bin mir nicht sicher, ob solche bilder auch enthalten sein sollen, oder eher im Appendix mit verweis? Ein bessered bild von der hinterseite der platte wäre evtl auch noch gut, obwohl ich richtig gerne den Hund drauf behalten würde:D}
@@ -341,20 +341,44 @@ where $\Gamma \succeq 0$ specifies the penalty metric (a weighting / masking mat
 \begin{equation}\label{eq:tik_gamma}
 \hat{\mathbf{d}} = (\mathcal{L}^T \mathcal{L} + \lambda \Gamma)^{-1} \mathcal{L}^T \mathbf{m}.
 \end{equation}
-In practice $\Gamma$ is diagonal with ones everywhere except zeros at transducer locations, so those coefficients are unpenalized. This allows the inversion to self-correct for slight inconsistencies in the emitter pulse form.
+In practice $\Gamma$ is diagonal with ones everywhere except zeros at transducer locations along with a small radius around them, so those coefficients are unpenalized. This allows the inversion to self-correct for slight inconsistencies in the emitter pulse form. When plotting the defect vector as a heatmap during evaluation, these regions are omitted from the plot by setting to 0, as otherwise, these regions would dominate the results.
 
 
 % Dispersion figure moved to Section \ref{sec:plate-characterization}
 
-\section{Results}\label{Results (simulation study)}
+\section{Results}\label{Results}
 
+The results as seen in Figures \ref{fig:Results} show a succesful localization of a $1cm^3$ metal cube on a cfrp plate. The algorithm is only fed information about the metal cube defect through responses from the transducers at their respective locations, a sparse set of measruements compared to the entire plate, which is characterized through a 104x104 grid of measruements.
 
+All data has been bandpass filtered in time to 1-50khz. The lower boundary of 1khz is chosen due to the insidgnificant amout of singals in the regime given the 80khz ricker wavelet excitation pulse. Moreover, in this range, the wavelengths easily exceed the length of the plate itself, indicating that it would be dominated by systematic errors such as the plate swinging, or a pure displacement. 
+
+In figure \ref{fig:Results_normal}, we see a visualization of the defect vector $\vec{\mathbf{d}}$ for which the system solved for in equation \ref{full_system}. Every pixel in the figure corresponds to the absolute value of every index of $\vec{\mathbf{d}}$. Note that around the transducers designated in red, is a small black region. This is the non regularized section as described in section \ref{Regularized inversion}. This regions helps correct for deviations in the pulse shape sent by the transducers between the calibration and defect measuring step, at the cost of not being able to detect defects in said region. This exclusion zone is needed in this case, as without, the phantom defects appeared around some transducers. 
+
+Note the the heatmap amplitude of Figure \ref{fig:Results_normal} is to be seen with a grain of salt. The values change greatly based on the regularization parameters chosen, and depend on the nature of the system in general. In the results, it would implicate that the defect reflection in certain regions with a reflection amplitude of 0.01. We cannot draw conclutions about the nature of the defect from this, as the total effect of the defect depends on all components together, as well as having to account from the lower amplitude due to regularization. A proper investigation would reguire the use of a defect amplitude density, aswell as a correction from regularization effects.
+
+Figure \ref{fig:Results_side} shows a side ways view of the heatmap in figure \ref{fig:Results_normal}. That is, of the heatmap, slices along the x-axis are taken. Only slices are taken where at least one part of the slice has amplitude of at least 0.6 times the max amplitude. The same amplitude is chosen to estimate the localization width at 19mm. It is usually customary to choose 0.5 as threshold for width, but in this specific case, at 0.5 some slices are included where the background noise goes over the threshold. Therefore 0.6 is chosen. From the plot, we can deduce that the half width of the cube defect is  \approx 2cm. 
+
+The 50khz upper limit is a semi arbritrary choice. The reusults are similary good if the upper limit increased to 80khz, but is was deemed more interesting to show results using less information. 
+
+Increasing the upper bound to 150khz decreases the reconstrution results greatly. Additional evaluations at 100-150khz show that the results are poor in this frequency range. This stands in contrast to the previous simulation study where increased frequency ranges generally led to better results. This indicates that the poor higher frequency results are caused by deviations from simulated setups. Such deviations include non-perfect repetitions of transucer signals, and the ldv scan on the transducer locations not perfectly alligning with the initial scan. Such deviations are naturally more sensitive in the high frequency range. As such, the ability of the algorithm to work in low frequency ranges proved critical in providing good results in a real world setup. 
 
 \begin{figure}
+  \begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Results/1-50khz + Defect.png}
+    \caption{The reconstructed defect of a cube glued on the plate. Die red diamonds mark the transducer locations. The yellow square denotes the spot on which the metal Cube was glued onto.}
+    \label{fig:Results_normal}
+  \end{subfigure}\hfill
   \centering
-  \includegraphics[width=0.5\linewidth]{Figures/Results/1-50khz + Defect.png}
-  \caption{The reconstructed defect of a cube glued on the plate. Die red diamonds mark the transducer locations. The yellow square denotes the spot on which the metal Cube was glued onto. The heatmap maps the the reflectivity amplitude }
-  \label{fig:Screenshot}
+  \begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Results/section_scan_1-50khz_x.png}
+    \caption{A cross section view of Figure \ref{fig:Results_normal} along the x-axis. Only slices with max amplitude of 0.6 are included and their envelope drawn. The localization accuracy is estimated with width a 0.6 max amplitude threshold.}
+    \label{fig:Results_side}
+  \end{subfigure}
+  
+  \caption{}
+  \label{fig:Results}
 \end{figure}
 
 \section{Discussion}\label{Discussion}
