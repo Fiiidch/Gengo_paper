@@ -343,7 +343,6 @@ where $\Gamma \succeq 0$ specifies the penalty metric (a weighting / masking mat
 In practice $\Gamma$ is diagonal with ones everywhere except zeros at transducer locations along with a small radius around them, so those coefficients are unpenalized. This allows the inversion to self-correct for slight inconsistencies in the emitter pulse form. When plotting the defect vector as a heatmap during evaluation, these regions are omitted from the plot by setting to 0, as otherwise, these regions would dominate the results.
 
 
-% Dispersion figure moved to Section \ref{sec:plate-characterization}
 
 \section{Results}\label{Results}
 Figure~\ref{fig:Results_normal} shows the reconstructed defect vector $\vec{\mathbf{d}}$, with each pixel representing the absolute value of a spatial grid point. In other words,  after solving for the vector $\vec{\mathbf{d}}$ from equation \ref{full_system}, we obtain a vector which for every grid point corresponds to the reflection amplitude of a defect at the given point. In our case, the vector has dimension $101\times104 = 10'816$ entries, one parameter per grid point. In order to visualize the data, every grid point in converted back onto the 2D plane based on how it was initially converted onto a 1D system. The absolute value of the index at every grid point is mapped in the final heatmap. This can be interpreted as the amplitude with which the incoming wave is reflected back at each given location, although no information about the phase shift preserves, given the vector is in complex valued. Note that the algorithm itself does not know where every index corresponds to on the 2D plane. Moreover, there is no constraint that the system must be defined over a 2D plane. 
@@ -377,11 +376,14 @@ Computations used the 1--50 kHz band exclusively. Testing with extended frequenc
 
 \section{Discussion}\label{Discussion}
 
-The reconstructed defect has a half-width of approximately 2 cm compared to a wavelength of $\lambda_{50} \approx 8$ cm at 50 kHz (Figure~\ref{fig:Dispersion:a}), yielding sub-wavelength localization. This is achieved despite working with sparse measurements at only five transducer locations.
+The reconstructed defect has a half-width of approximately 2 cm compared to a wavelength of $\lambda_{50} \approx 8$ cm at 50 kHz (Figure~\ref{fig:Dispersion:a}), yielding sub-wavelength localization.  See Appendix \ref{Appendix_Dispersion_Curve} for further comments regarding the validity of the phase velocities. This is significantly below the wavelength size. This property has garned a large amount of discussions as to why it is the case, and they are hard to answer concisely, as it is hard to show why something is \textit{not} the case. In short, there is no reason why such a restriction should exist given the mathematical methodology used that does not use spatial information. It is easier to point why a given other method \textit{does} have certain restrictions, which usually is caused by the need to reconstruct measured waves in space. \cite{ebrahimkhanlou_acoustic_2017} is a great example of such a method, that does have the restriction, but does not discuss it. 
 
-The unpenalized region around transducers (Section~\ref{Regularized inversion}) was necessary to suppress phantom defects in early inversions. Pulse shape measurements confirmed slight temporal and amplitude variations between calibration and monitoring phases. Rather than correcting these variations explicitly, the inversion absorbs them locally in the unpenalized zones. This approach is pragmatic given that transducer locations are known a priori and do not need to be resolved spatially.
+However, in the simulation study, a decrease in resolution is observed with the lower frequencies, which implies that the method is not completely independent of the wavelength limit. What makes discussion hard however, is that this analysis does not isolate variables; the decrease in the frequency bandwidth simultaneously causes three variables to be changed:
+Decrease in the maximum frequency, decrease in the amount of information available due to the system matrix shape \ref{full_system}, and susceptibility to the standard norm based regularization \textit{smearing} the result due to neighboring points having more similar responses as a result of longer wavelengths. For all intents and purposes, the method does have a resolution limitation as a function of frequency, but it is not caused by a hard mathematical limit such as the Nyquist sampling theorem for example, but rather a collection of various limitations. Given the proof of concept nature of this paper, I refrain from digging deeper into this topic, just noting as a closing point that it is possible to isolate each of these variables to obtain definite answers if one so desires.
 
-Testing with extended frequency ranges showed that the 1--80 kHz band yields only modest quality improvements over 1--50 kHz, while extending to 1--150 kHz causes severe reconstruction degradation. Analysis of the 100--150 kHz band alone yields poor results, indicating that this frequency range carries no useful information for defect localization in the current setup.
+The unpenalized region around transducers (Section~\ref{Regularized inversion}) was necessary to suppress phantom defects in early inversions. Pulse shape measurements confirmed slight temporal and amplitude variations between calibration and monitoring phases. Rather than correcting these variations explicitly, the inversion absorbs them locally in the unpenalized zones. 
+
+Testing with extended frequency ranges showed that the 1--80 kHz band yields only modest quality improvements over 1--50 kHz, while extending to 1--150 kHz causes severe reconstruction degradation. Analysis of the 100--150 kHz band alone yields poor results, indicating that this frequency range carries no useful information for defect localization in the current setup. The 1--50kHz Range working similarly well to 1--80kHz is especially interesting considering the system matrix to be solved in equation \ref{full_system} has dimensions $1000\times 10816$. The inversion problem is highly underdetermined by a factor of over 10. Further discussion can be found in Appendix \ref{Appendix_frequencies}.
 
 A key source of degradation at higher frequencies likely is misalignment between the calibration and monitoring phases. During calibration, the LDV scans a dense 104×104 grid. During monitoring, the LDV measures at transducer locations only, and realignment relies on visual cues, introducing small spatial offsets. Such misalignments couple strongly to phase information at shorter wavelengths. Notably, this alignment issue would be eliminated entirely if monitoring were performed using the transducers themselves as receivers rather than the LDV, as discussed in Section~\ref{Appendix_Piezoelectric}. At high frequencies, the Born approximation may also break down as secondary and multiple scattering contributions become more relevant.
 
@@ -417,9 +419,44 @@ The results presented in the main paper employ a 1--50 kHz bandpass filter, whic
 \end{figure}
 
 \subsection{Previous Results based on Simulations}\label{Appendix_Simulation_Results}
-TODO
+In a previous work leading up to this paper, extensive testing of the same method based on simulations has been performed. Using commercial simulation software, the method has been tested against various defects using a rectangular aluminum plate of 9mm thickness. Defects have been simulated using changes in density on the plate. The two such results are shown in Figures TODO. The simulated results show somewhat similar pattern to that of the real worls simulations. The main difference being that the results do not degrade with higher frequency bands, and no exclusion zones are required aside from the sensor locations themselfes. (Even in simulations, there have been relative pulse amplitude variations of the order of 0.05-0.2 for reasons we cannot quite explain). 
+
+\begin{figure}
+  \begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/}
+    \caption{Results of Simulation A}
+    \label{fig:Simulation_A_results}
+  \end{subfigure}\hfill
+  \centering
+  \begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Raw_data/50khz_1.9ms.png}
+    \caption{Same setup at $t = 1.9$ ms, near the end of the 2 ms period. The pulse tail from the current repetition is still visible, and the pulse from the next repetition (nominally starting at $t = 0.12$ ms) is already present, demonstrating the wraparound inherent in the periodic time treatment.}
+    \label{fig:Simulation_A_Defect}
+  \end{subfigure}
+  \caption{Defect A, a heatmap of the densities on the aluminum plate.}
+  \label{fig:Defect_A}
+\end{figure}
+
+
+
+\subsection{Discussions regarding validity of the Dispersion curve}\label{Appendix_Dispersion_Curve}
+Figures \ref{fig:Dispersion} indicate phase velocities approaching 6km/s or higher as the frequency increases. Using theoretical lamb isotropic wave analysis using rough estimates of the densities of CFRP plates, we obtain that the A0 mode converges towards roughly 3.8km/s as the frequency increases. The empirical numbers are within a reasonable range to the model in comparison, albeit I personally am taking the empirical numbers with care. Given we only use the phase velocities to judge wether the method did achieve sub wavelength localization, the exact numbers are not highly important, so it is likely safe to say that the phase velocities at 50khz are in the range of 4-8cm depending on direction. Even in this case, the localization accuracy at roughly 2cm is well below the wavelengths involved. Therefore no further study into the velocities are made.
+
+\subsection{Regarding Frequencies and reconstruction}\label{Appendix_Frequencies}
+The algorithm appears to have decreased benefit from using higher frequency data, despite the frequency spectrum of the waves going well over 50khz, which is expected given the central frequency of 80kHz of the pulses sent, but is also confirmed by analizing the responses at various locations on the plate. This deviates from a previous simulation study where the same method was tested in a simulated environment. As discussed in section \ref{Discussion}, the misallignement of the measuring location at the sensors is likely a factor at higher frequencies. Another reason may lie in the fundamental assumption in how the problem is set up. In section \ref{Defect model} we introduce a simplified assumption in that a defect responds in a delta like manner, meaning incoming waves are reflected instantly, with no phase dependence. In the simulation study, defects were modeled as changes in density, while the real work example through an adhered metal cube is more similar to a change in stiffness. It may be that in the latter case, the assumption of frequency independent responses is less valid. In that case, restricting the frequency band may be helpful in that, while the data available is decreased, the frequency region in which the assumption has to be valid is decreased, making the assumption valid in more situations. Given the experiment performed, we cannot isolate these variables to give a definitive answer.
 
 \subsection{Piezoelectric Measuring}\label{Appendix_Piezoelectric}
+A full transducer based implementation may be to be done as follows: 
+
+For every transducer location, use two transducers close by: One is the transmitting transducer, and the other the sensing one. During calibration, one of the transmitting transducers sends out a periodic pulse, and an ldv scans the object in the experiement of this paper. In addition to the LDV data, the sensing transducers's measurements are also added to the LDV data, and is treated as a grid point as any other. In the code, treat the sensing transducer measurement as that of the emitter location. This way, all problems regarding coupling when the transducer is measuring is absorbed into the the object properties, and should allow the use of cheap transducers with poor coupling properties.
+
+\textbf{Notes: } Do not use thick transducers, such as ones with the shape of a cube for this application. The thickness increases stiffness of the plate locally, making measurement on and by the transducer impossible. Always use flat transducers relative to plate thickness such as ceramic based transducers. 
+
+One may notice that the actual location of the emitting transducer, and that which is considered the transmitter is not the same. This is fine and intentional, and is implicitly done in this paper as well, since the LDV does not scan exactly at the locations where the transducers are adhered, and is mathematically consistent. One may think we could decouple the locations of the actual transducer, and the transducer location even further, but it quickly becomes highly unstable at a few cm of distance. There is however a possibility to use one emitting transducer, and multiple sensing transducer close by, treating every sensing transducer as an emitter in the model. I hypothesize this could work, but the benefit may be diminishing. 
+
+
 
 \subsection{Computational aspects}\label{Computational aspects}
 Due to the large amounts of data involved, it is necessary to save intermediate data to disk and load sections as needed. The HDF5 file format is useful for this application.
