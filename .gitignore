@@ -1,5 +1,4 @@
-# Ignore Figs directory
-/Figs
+
 
 # LaTeX auxiliary files
 *.aux
