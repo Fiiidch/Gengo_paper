@@ -121,13 +121,13 @@ inverse scattering \sep non-destructive testing \sep ultrasonic NDT \sep defect 
 \maketitle
 
 \section{Introduction}\label{Introduction}
-Structural Health Monitoring (SHM) of engineered components aims to localize and characterize defects. The importance of SHM depends on the cost of failure, which is especially relevant in aviation, hence many methods of performing SHM on flat structures have been explored and documented. Among these methods, Piezoelectric sensors are promising from a commercial point of view due to their low cost. However, increased challenges are noted when monitoring CFRP components \cite{Aircraft_NDT}. Different state if the art Methods for CFRP specifically are explored in \cite{Current_Methods}.
+Structural Health Monitoring (SHM) of engineered components aims to localize and characterize defects. The importance of SHM depends on the cost of failure, which is especially relevant in aviation, hence many methods of performing SHM on flat structures have been explored and documented\cite{Aviation_Book}. Among these methods, Piezoelectric sensors are promising from a commercial point of view due to their low cost. However, increased challenges are noted when monitoring Carbon-fiber-reinforced polymer (CFRP) components \cite{Aircraft_NDT}. Different methods for CFRP SHM specifically are explored in \cite{Current_Methods}\cite{Composite_pipe_ndt}.
 
-Sparse monitoring using Piezoelectric sensors (measuring at a few strategically placed sensors) would be therefore be especially desirable, but it typically demands detailed numerical forward models that are difficult to build and maintain in composites \cite{Modelling_Challenges}. Carbon-fiber-reinforced polymer (CFRP) plates, in particular, exhibit variability from layup and manufacturing that undermines predictive digital twins \cite{Manufacturing_Variability_Problems}.
+Sparse monitoring using Piezoelectric sensors (measuring at a few strategically placed sensors) of lamb waves \cite{Lamb_wave_transducer} would be therefore be especially desirable, but it typically demands detailed numerical forward models that are difficult to build and maintain in composites \cite{Modelling_Challenges}. CFRP plates, in particular, exhibit variability\cite{CFRP_Defects} from layup and manufacturing that undermines predictive digital twins \cite{Manufacturing_Variability_Problems}. The use of Laser Doppler Vibrometers (LDV) in data-driven approaches for composite structures has gained increasing attention as a means of circumventing these challenges \cite{LDV_SHM_CFRP}. 
 
-This paper validates a model-free alternative based on empirical linear operators and a fundamentally periodic time embedding. We excite the structure with bonded piezoelectric transducers and use a Laser Doppler Vibrometer (LDV) to perform a dense, one-time calibration scan that constructs source–receiver impulse-response operators. Propagation is treated on a discrete cyclic time axis so that it acts as circular convolution, diagonalized by the discrete Fourier transform (DFT). 
+This paper validates a data driven alternative based on empirical linear operators\cite{Matrix_use_in_ndt} and a fundamentally periodic time embedding. The result is a matrix based description of the system and it's inversion to solve for defects \cite{inversion_method_1}. We excite the structure with bonded piezoelectric transducers and use an LDV to perform a dense, one-time calibration scan that constructs source–receiver impulse-response operators. Propagation is treated on a discrete cyclic time axis so that it acts as circular convolution, diagonalized by the discrete Fourier transform (DFT). 
 By designing the excitation to be strictly periodic and ensuring no other sources act on the object, the cyclic time embedding is valid by construction; we impose time periodic behavior in the setup, and thus the frequency treatment becomes equivalent to the time domain treatment.
-Within a single-scattering formulation, defect localization is solved via Tikhonov-regularized inverse\cite{Tikhonov} using only sparse monitoring data at the transducer locations. 
+Within a single-scattering formulation, defect localization is solved via Tikhonov-regularized inverse\cite{Tikhonov}\cite{Tikhonov_matrix} using only sparse monitoring data at the transducer locations. 
 
 We validate the approach experimentally on an anisotropic CFRP plate, demonstrating sub-wavelength localization from sparse measurements.
 
@@ -289,7 +289,7 @@ so that
 \begin{equation}
 \Delta \vec m_{ij} = L^{\mathrm{gen}}_{ij}\, \vec{\mathbf{d}}_{\mathrm{full}}.
 \end{equation}
-This system is typically massively under determined, and even if not too massive for practical computing.
+This system is typically highly underdetermined, and even when it is not, it is too large for practical computation. In our use case, the fully time‑resolved defect vector would have dimension $N_{\text{grid}} N_t \approx 10^6$ (with $N_{\text{grid}}$ spatial grid points and $N_t$ time samples per period).
 
 However, knowing that scatterers generally re-emit waves almost immediately, we can restrict the defect vectors $\vec d_k$ around a small set of temporal basis functions. As mentioned in the previous section, we continue with the simplest case where $\vec{d}_k = d_k * \vec{e}_0$, i.e., a 1D basis. Since every defect at any location is parameterized by a single parameter $d_k$, the full defect vector can be represented as
 
@@ -340,7 +340,9 @@ where $\Gamma \succeq 0$ specifies the penalty metric (a weighting / masking mat
 \begin{equation}\label{eq:tik_gamma}
 \hat{\mathbf{d}} = (\mathcal{L}^T \mathcal{L} + \lambda \Gamma)^{-1} \mathcal{L}^T \mathbf{m}.
 \end{equation}
-In practice $\Gamma$ is diagonal with ones everywhere except zeros at transducer locations along with a small exclusion zone around them, so those coefficients are unpenalized. This allows the inversion to self-correct for slight inconsistencies in the emitter pulse form. When plotting the defect vector as a heatmap during evaluation, these regions are omitted from the plot by setting to 0, as otherwise, these regions would dominate the results.
+We use $\Gamma$ as a diagonal with ones everywhere except zeros at transducer locations along with a small exclusion zone around them, so those coefficients are not penalized. This allows the inversion to self-correct for slight inconsistencies in the emitter pulse form. When plotting the defect vector as a heatmap during evaluation, these regions are omitted from the plot by setting to 0, as otherwise, these regions would dominate the results.
+
+The presented implementations of the Tikhonov regularized inversion is rather basic, avenues to be expanded upon \cite{Tikhonov_matrix}
 
 
 
@@ -383,9 +385,11 @@ Testing with extended frequency ranges showed that the 1--80 kHz band yields onl
 
 A key source of degradation at higher frequencies is likely misalignment between the calibration and monitoring phases. During calibration, the LDV scans a dense 104×104 grid. During monitoring, the LDV measures at transducer locations only, and realignment relies on visual cues, introducing small spatial offsets. Such misalignments couple strongly to phase information at shorter wavelengths. Notably, this alignment issue would be eliminated entirely if monitoring were performed using the transducers themselves as receivers rather than the LDV, as discussed in Section~\ref{Appendix_Piezoelectric}.
 
-The absolute pixel values in Figure~\ref{fig:Results_normal} should be interpreted as relative indicators of defect location rather than quantitative scattering amplitudes. The regularization parameter $\lambda$ significantly influences amplitude scaling, and the total defect effect depends on all spatial components jointly. Future quantitative work would require amplitude-density analysis and regularization-artifact correction; here, the focus is on successful localization from sparse data.
+The absolute pixel values in Figure~\ref{fig:Results_normal} should be interpreted as relative indicators of defect location rather than quantitative scattering amplitudes. The regularization parameter $\lambda$ significantly influences amplitude scaling, and the total defect effect depends on all spatial components jointly. Future quantitative work would require amplitude-density analysis and regularization-artifact correction. Here, the focus is on successful localization from sparse data.
 
 Working effectively in the 1--50 kHz band validates the empirical-operator concept, even with practical imperfections such as pulse-shape drift and measurement misalignment. The robustness in this band supports our initial hypothesis: circumventing detailed forward models in favor of empirical operators leads to numerically robust properties in the detection algorithm, allowing imperfections to be absorbed into the interpretation of the measured quantities themselves. By removing explicit spatial information entirely (the algorithm does not know about the spatial relations between each grid point), it naturally removes restrictions caused by the frequency-to-pulse-width relation, allowing us to work at low frequencies, which in turn leads to numerical robustness.
+
+Although not explicitly explored in this paper, previous  extensive simulation work documented in \cite{WueestMScThesis} indicated following limitations to the approach: Firstly, a large defect size relative ($\approx 0.1$) to the rest of the system becomes hard to resolve, likely caused by the single scattering approximation becoming less valid. Secondly, reconstruction quality depends on the defect shape.  Thirdly, while small defects can be localized well below wavelength sizes, the defect shape cannot be resolved if the defect is much smaller than the wavelength. 
 
 \section{Conclusion}\label{Conclusion}
 
@@ -425,6 +429,8 @@ Simulations used five transducers emitting a 50 kHz Ricker wavelet with a 10 ms 
 
 Case A (Figure \ref{fig:Defect_A}) contains a tapered circular lower-density inclusion (1.5 cm diameter) and demonstrates accurate localization in an idealized setting. Case A5B (Figure \ref{fig:Defect_A5B}) contains two tapered inclusions (1.5 cm and 5 cm diameters) and illustrates the method's ability to resolve multiple and larger defects simultaneously. While the simulated reconstructions are generally cleaner than the experimental results, the spatial patterns are consistent and the simulations provided useful guidance for the laboratory campaign.
 
+Figure \ref{fig:ECHO} is a proof of concept that this method can work using only one sensor. In this case, only one sensor is active as emitter, and simultaneously acts as the only sensor, essentially sending out signals, and measuring the response in a pulse-echo configuration. The data in this case is band passed to 100kHz, but otherwise, the parameters are the same as the other simulation cases. This problem statement is very similar to that of \cite{ebrahimkhanlou_acoustic_2017}, providing a close comparison to a different method.
+
 Further details and additional simulation examples are documented in \cite{WueestMScThesis}.
 
 \begin{figure}
@@ -462,11 +468,17 @@ Further details and additional simulation examples are documented in \cite{Wuees
   \caption{Simulation case A5B. Left reconstruction. Right: Density map. }
   \label{fig:Defect_A5B}
 \end{figure}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\linewidth]{Simulated_Figures/ECHO.png}
+  \caption{Defect A (Fig \ref{fig:Defect_A} reconstruction using only one transducer, using a 0--100kHz band.)}
+  \label{fig:ECHO}
+\end{figure}
 
 
 
 \subsection{Discussions regarding validity of the Dispersion curve}\label{Appendix_Dispersion_Curve}
-Figures \ref{fig:Dispersion} suggest phase velocities that increase with frequency and reach values of order 10km/s at the upper end of the measured band. A simple Lamb-mode estimate using rough CFRP parameters places the high-frequency A0 branch near ~3.8 km/s; both the empirical and theoretical numbers should be considered approximate.
+Figures \ref{fig:Dispersion} suggest phase velocities that increase with frequency and reach values of order 10km/s at the upper end of the measured band. A theoretical \cite{OG_Lamb_wave} Lamb-mode estimate using rough CFRP parameters places the high-frequency A0 branch near ~3.8 km/s; both the empirical and theoretical numbers should be considered approximate.
 
 The empirical estimates may be affected by measurement noise, limited angular sampling, and small alignment errors between calibration and monitoring. Conversely, the theoretical Lamb-mode calculation is only a rough ballpark because it assumes isotropic, homogeneous material properties and does not account for the plate's anisotropy or layup. Hence discrepancies between the two are to be expected and can be substantial; neither approach alone provides a definitive ``ground truth.''
 
@@ -482,6 +494,7 @@ In this context, restricting the frequency band may be advantageous: although fe
 
 \subsection{Piezoelectric Measuring}\label{Appendix_Piezoelectric}
 %This section will likely be moved to a future work section, or into discussion.
+***This section will likely have to be moved to a future work section or similar***
  A fully transducer-based implementation could proceed as follows: For each transducer location, two transducers are placed close together; one acts as the transmitter, the other as the sensor. During calibration, a transmitting transducer emits a periodic pulse while an LDV scans the object. The measurements from the sensing transducer are added to the LDV data and treated as an additional grid point. In the code, the sensing transducer's measurement is assigned to the emitter location, so any coupling effects are absorbed into the object properties, potentially allowing the use of inexpensive transducers with poor coupling.
 
  	\textbf{Notes:} Thick, cube-shaped transducers should be avoided, as their stiffness locally alters the plate and makes measurement at or by the transducer impossible. Always use flat, plate-like ceramic transducers relative to the plate thickness.
