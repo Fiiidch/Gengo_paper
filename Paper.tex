@@ -136,10 +136,11 @@ Within a single-scattering formulation, defect localization is solved via Tikhon
 
 
 \section{Methodology}
-The test specimen is a $26.8\,\mathrm{cm}\times26.8\ \times0.14\,\mathrm{cm}$ bi-directional CFRP plate (8 layers, [0°\textsubscript{2}/90°\textsubscript{2}]\textsubscript{s}, HexPly 8552/AS4). Five low-cost brass–ceramic piezoelectric discs with a nominal diameter of 12 mm are bonded to the plate. The drive is a periodic pulse train with a $2\,\mathrm{ms}$ repetition period, using a 80\,kHz Ricker wavelet as the pulse shape to enforce timing periodicity. Transducers were bonded using a hand-applied, temperature-activated adhesive (Crystalbond). Exact formulation and bond thickness were not recorded. As will be derived in Section \ref{Empirical impulse responses}, the method is independent of the source transfer function, and thus works for a wide range of unknown coupling properties. An LDV scans the plate on a $104\times104$ square grid, recording the full 3-component velocity vector over time. For this work, we use only the out of plane Vz component, which is excited strongest by the piezoelectric sources.   Figure~\ref{fig:Screenshot} shows one frame of such a measurement. The potential use of all three velocity components is discussed in \ref{Appendix_V_yxz}.
-
-
-This scan is repeated for each of the five transducers, which constitute the one-time calibration step. Data are sampled at $625\,\mathrm{kHz}$ and low-pass filtered to 50\,kHz prior to computation. Each grid location is acquired with 10 repeats 5 separate times. I.e. we obtain 5 sets of measurements total, each having been averaged 10 times. All velocities are normalized by dividing all values by the maximum velocity recorded. The normalization increases numerical precision of floating point numbers in case of very high measurement numbers, and helps in having the optimal regularization parameter be of similar values for different systems, which will be introduced in section \ref{Regularized inversion}. As a result, the following plots such as Figure\ref{fig:Screenshot} use unitless velocities, and may not be consistent between different plots such as Figure\ref{fig:Dispersion:a} due to having a different global maxima chosen between different scripts. The normalization does not affect values of the results.
+The test specimen is a $26.8\,\mathrm{cm}\times26.8\ \times0.14\,\mathrm{cm}$ bi-directional CFRP plate (8 layers, [0°\textsubscript{2}/90°\textsubscript{2}]\textsubscript{s}, HexPly 8552/AS4). Five low-cost brass–ceramic piezoelectric discs with a diameter of 12mm are bonded to the plate using a Crystalbond adhesive. Exact formulation and bond thickness were not recorded. As shown in Section \ref{Empirical impulse responses}, the method is independent of the source transfer function, and thus works for a wide range of unknown coupling properties.
+\paragraph{}
+The drive is a periodic pulse train with a $2\,\mathrm{ms}$ repetition period, using a 80\,kHz Ricker wavelet as the pulse shape.  An LDV scans the plate on a $104\times104$ square grid, recording the full 3-component velocity vector over time. For this work, we use only the out of plane Vz component, which is excited strongest by the piezoelectric sources.   Figure~\ref{fig:Screenshot} shows one frame of such a measurement. The potential use of all three velocity components is discussed in \ref{Appendix_V_yxz}.
+\paragraph{}
+This scan is repeated for each of the five transducers, which constitute the one-time calibration step. Data are sampled at $625\,\mathrm{kHz}$ and low-pass filtered to 50\,kHz prior to computation. Each grid location is acquired with 10 repeats 5 separate times. I.e. we obtain 5 sets of measurements total, each having been averaged 10 times. All velocities are normalized by dividing all values by the maximum velocity recorded. The normalization increases numerical precision of floating point numbers in case of very high measurement numbers, and helps in having the optimal regularization parameter be of similar values for different systems, which will be introduced in section \ref{Regularized inversion}. As a result, the following plots such as Figure\ref{fig:Screenshot} use unitless velocities, and may not be consistent between different plots such as Figure\ref{fig:Dispersion:a} due to having a different global maxima chosen between different scripts. The normalization does not affect the results.
 
 
 \begin{figure}
@@ -149,7 +150,7 @@ This scan is repeated for each of the five transducers, which constitute the one
   \label{fig:Diag_LDV}
 \end{figure}
 
-
+\paragraph{}
 
 After calibration, a $1\,\mathrm{cm}^3$ iron cube is bonded to the plate to simulate a defect. During monitoring, we excite each transducer again but measure only at the transducer locations. In our setup, the LDV acquires these sparse responses at the transducer positions. 
 
@@ -235,11 +236,11 @@ so that $G_{ij}\vec v = \vec g_{ij} * \vec v$ (circular convolution). All such o
 \subsection{Empirical impulse responses}\label{Empirical impulse responses}
 We do not separate an ``ideal'' injected waveform from local reverberations at a transducer. The self-measured periodic signal $\vec s_s$ is taken as the source vector. For a transducer $s$ and measurement point $i$ (grid or other transducer), the response is modeled as a circular convolution:
 \begin{equation}\label{eq:empirical_conv}
-\vec m_{i} = G_{is} \vec s_s
+\vec m_{i} = G_{is} \vec s_s = g_{ij}\ast\vec s_s
 \end{equation}
 where $G_{is}$ is circulant (first column $\vec g_{is}$). Directional (mode) decomposition is intentionally omitted because the LDV records only the scalar out-of-plane velocity at each sampled point.
 
-To robustly estimate $\vec g_{is}$, we use repeated measurements. Let $\{(\vec s_{s,p}, \vec m_{i\mid s,p})\}_{p=1}^P$ denote $P$ repeated acquisitions. In the frequency domain (hats denote DFT components), for each frequency bin $f$ we solve the Tikhonov-regularized least-squares problem:
+$\vec g_{ij}$ is computed as the regularized least squared solution of equation \ref{eq:empirical_conv} of multiple sets of noisy measurements. the solution to which can be computed in the frequency domain component wise: Let $\{(\vec s_{s,p}, \vec m_{i\mid s,p})\}_{p=1}^P$ denote $P$ repeated acquisitions. In the frequency domain (hats denote DFT components), for each frequency bin $f$ we solve the Tikhonov-regularized least-squares problem in frequency domain:
 \begin{equation}\label{Tikhonov_impulse}
 \min_{\hat{g}_{is}(f)} \sum_{p=1}^P \left| \hat{m}_{i\mid s,p}(f) - \hat{s}_{s,p}(f) \hat{g}_{is}(f) \right|^2 + \alpha |\hat{g}_{is}(f)|^2
 \end{equation}
@@ -247,13 +248,12 @@ with regularization parameter $\alpha > 0$. The closed-form solution is:
 \begin{equation}
 \hat{g}^{\mathrm{reg}}_{is}(f) = \frac{\sum_p \overline{\hat{s}_{s,p}(f)}\, \hat{m}_{i\mid s,p}(f)}{\sum_p |\hat{s}_{s,p}(f)|^2 + \alpha}
 \end{equation}
-The result is a stabilized impulse-response function that does not rely on assuming specific noise characteristics.
-
-\textbf{Notes:} Although the framework is presented with LDV-acquired empirical impulse responses, the same operators $G_{ij}$ can be generated computationally from an analytical model or a digital twin (e.g., FEM/FDTD). In that case, emitter and receiver coupling, as well as the enforced periodicity, must be accounted for separately. 
-
+The result is a stabilized impulse-response function that does not rely on assuming specific noise characteristics. $\alpha$ must just be a small number to assert no singularity errors happen. The exact choice does not affect the final solution in any noticeable ways.
 
 \subsection{Defect model}\label{Defect model}
-Since defects also satisfy the assumptions in Section~\ref{System assumptions}, their effects can be modeled using circular convolutions. Within the single-scattering (Born-type) approximation, the scattering process is illustrated in Fig.~\ref{fig:Diag}. For clarity, we first assume a \emph{delta-like} (instantaneous) temporal reflection kernel, so each defect is represented by a scalar amplitude $d_k$ at its spatial location. Algebraically, this corresponds to selecting only the first canonical temporal basis vector $\vec e_0$. This is a \textbf{defect-basis choice} made for pedagogical clarity, not a limitation of the framework. The generalization to richer local bases is presented in Section~\ref{Generalization to arbitrary defect bases} after the main operator assembly and inversion.
+Since defects also satisfy the assumptions in Section~\ref{System assumptions}, their effects can be modeled using circular convolutions. Within the single-scattering (Born-type) approximation, the scattering process is illustrated in Fig.~\ref{fig:Diag}. We assume a \emph{delta-like} temporal reflection kernel, so each defect is represented by a scalar amplitude $d_k$ at its spatial location. Algebraically, this corresponds to selecting only the first canonical temporal basis vector $\vec d_ k = \vec e_0$, and physically, it corresponds to a defect position re-emitting the incoming wave immediately. 
+
+The model in general can be expanded upon to richer reflection models, with any basis of vectors as potential solutions, and has been implemented to with this capability, but no useful bases have been found (That at least justify the higher computational cost), and as such, all results shown in this paper use the simple delta basis.  The generalization to richer local bases is presented in Section~\ref{Generalization to arbitrary defect bases}.
 
 \begin{figure}
   \centering
@@ -284,7 +284,7 @@ Writing the defect vectors $\vec{d}_k$ as a single vector:
 \vec{\mathbf{d}}_{\mathrm{full}} := \begin{bmatrix} \vec{d}_1 \\ \vec{d}_2 \\ \vdots \\ \vec{d}_N \end{bmatrix}
 \end{equation}
 
-The problem can be restated as a matrix problem with
+The problem can be restated as a general matrix problem with
 
 \begin{equation}
 L^{\mathrm{gen}}_{ij} := \big[\; G_{i1} G_{1j} S_j \;\big|\; G_{i2} G_{2j} S_j \;\big|\; \cdots \;\big|\; G_{iN} G_{Nj} S_j \big]
@@ -295,7 +295,7 @@ so that
 \end{equation}
 This system is typically highly underdetermined, and even when it is not, it is too large for practical computation. In our use case, the fully time‑resolved defect vector would have dimension $N_{\text{grid}} N_t \approx 10^6$ (with $N_{\text{grid}}$ spatial grid points and $N_t$ time samples per period).
 
-However, knowing that scatterers generally re-emit waves almost immediately, we can restrict the defect vectors $\vec d_k$ around a small set of temporal basis functions. As mentioned in the previous section, we continue with the simplest case where $\vec{d}_k = d_k * \vec{e}_0$, i.e., a 1D basis. Since every defect at any location is parameterized by a single parameter $d_k$, the full defect vector can be represented as
+However, from the assumption that scatterers generally re-emit waves almost immediately, we can restrict the defect vectors $\vec d_k$ around a small set of temporal basis functions. As mentioned in the previous section, we continue with the simplest case where $\vec{d}_k = d_k * \vec{e}_0$, i.e., a 1D basis. Since every defect at any location is parameterized by a single parameter $d_k$, the full defect vector can be represented as
 
 \begin{equation}
 \vec{\mathbf{d}} := \begin{bmatrix} d_1 \\ d_2 \\ \vdots \\ d_N \end{bmatrix}
@@ -306,47 +306,54 @@ and integrated into the problem by including the basis vectors into the problem:
 \begin{equation}\label{L_Matrix_short}
 L_{ij} := \big[\; G_{i1} G_{1j} S_j \vec e_0 \;\big|\; G_{i2} G_{2j} S_j \vec e_0 \;\big|\; \cdots \;\big|\; G_{iN} G_{Nj} S_j \vec e_0 \big],
 \end{equation}
-
-where $\vec{e}_0$ in this equation is to be understood as a column vector. The final problem statement is then
+where $\vec{e}_0$ in this equation is to be understood as a column vector shaped matrix. 
+The final problem statement for one emitter at $i$ and sensor at $j$ is then
 \begin{equation}\Delta \vec m_{ij} = L_{ij} \vec{\mathbf{d}}.
-\end{equation}
-
-Stacking the selected $(i,j)$ pairs yields the global residual system
+\end{equation}\label{partial_system}
+For multiple sensor-emitter pairs, "stacking "the selected $(i,j)$ pairs yields the global residual system. For example for one emitter at (1) and two sensors at (2,3):
 \begin{equation}\label{full_system}
-\mathbf{m}_{\mathrm{full}} = L_{\mathrm{full}} \vec{\mathbf{d}},
-\end{equation}
-Here, "stacking" means vertically concatenating the pairwise residual vectors and their corresponding block-row operators, e.g.,
-\[
-\mathbf{m}_{\mathrm{full}} =
+\mathbf{ \vec m}_{\mathrm{full}} =
 \begin{bmatrix}
 \Delta \vec m_{1 2} \\
 \Delta \vec m_{1 3} \\
-\vdots
 \end{bmatrix},\qquad
 L_{\mathrm{full}} =
 \begin{bmatrix}
 L_{1 2} \\
 L_{1 3} \\
-\vdots
 \end{bmatrix}
-\]
-How the stacking is performed in practice depends on how many sensors/emitters are available and how the system is set up.
+\qquad
+\mathbf{\vec m}_{\mathrm{full}} = L_{\mathrm{full}} \vec{\mathbf{d}},
+\end{equation}
+Which corresponds to a [[1,2][1,3]] system.
+\paragraph{}
+In the examples shown in this paper in sections \ref{Results}, \ref{Appendix_Simulation_Results}, the systems with 5 sensors are set up as [
+    [1,2], [1,3], [1,4], [1,5],
+    [2,3], [2,4], [2,5],
+    [3,4], [3,5],
+    [4,5]
+], effectively using 10 measurements. (Futher discussion \ref{Appendix_sensor_configs})
 
-We have reduced the problem statement to the linear system in \eqref{full_system}. The only approximations made are the discretization of space and the assumption of first-order scattering.
+We have reduced the problem statement to the linear system in \eqref{full_system}. The only approximations made are the discretization of space, the assumption of first-order scattering and immediate reflection.
+
 
 
 \subsection{Regularized inversion}\label{Regularized inversion}
-Let $\mathcal{L} = L_{\mathrm{full}}$ and $\mathbf{m} = \mathbf{m}_{\mathrm{full}}$. We estimate the defect vector by minimizing the penalized least-squares functional. 
+Let $\mathcal{L} = L_{\mathrm{full}}$ and $\mathbf{m} = \mathbf{m}_{\mathrm{full}}$ from equation \ref{full_system}. We solve the linear inverse problem by finding $\mathbf{\vec d}$ to minimize following expression:
 \begin{equation}\label{eq:objective}
-J(\mathbf{d}) = \|\mathcal{L}\mathbf{d} - \mathbf{m}\|_2^2 + \lambda \| \Gamma^{1/2} \mathbf{d} \|_2^2,
+\text{argmin}_{\vec{\textbf{d}}} \; \|\mathcal{L}\mathbf{\vec d} - \mathbf{\vec m}\|_2^2 + \lambda \| \Gamma \mathbf{\vec d} \|_2^2,
 \end{equation}
-where $\Gamma \succeq 0$ specifies the penalty metric (a weighting / masking matrix) and $\lambda>0$ controls the trade-off between data fit and stabilization. The normal equations yield the closed form
+where $\Gamma \succeq 0$ specifies the penalty metric (a weighting / masking matrix) and $\lambda>0$ controls the trade-off between data fit and stabilization. The normal equations yield the closed form \cite{tikhonovintro} \cite{Matrix_formalism_tikhonov}
 \begin{equation}\label{eq:tik_gamma}
-\hat{\mathbf{d}} = (\mathcal{L}^T \mathcal{L} + \lambda \Gamma)^{-1} \mathcal{L}^T \mathbf{m}.
+\vec{\mathbf{d}} = (\mathcal{L}^T \mathcal{L} + \lambda \Gamma)^{-1} \mathcal{L}^T \mathbf{\vec m}.
 \end{equation}
+The solution can computed directly iteratively, or by first computing the matrix $(\mathcal{L}^T \mathcal{L} + \lambda \Gamma)^{-1} \mathcal{L}^T$ (more expensive), and saving it. Allowing a rapid computation of $\vec{\mathbf{d}}$ though a matrix vector multiplication of many new measurement sets $\mathbf{\vec m}$.
+
 We use $\Gamma$ as a diagonal with ones everywhere except zeros at transducer locations along with a small exclusion zone around them, so those coefficients are not penalized. This allows the inversion to self-correct for slight inconsistencies in the emitter pulse form. When plotting the defect vector as a heatmap during evaluation, these regions are omitted from the plot by setting to 0, as otherwise, these regions would dominate the results.
 
-The presented implementations of the Tikhonov regularized inversion is rather basic, avenues to be expanded upon \cite{Tikhonov_matrix}
+The optimal regularization parameter $\lambda$ in this paper is chosen with no particular method. In the examples of this paper, we are presenting the solution using the optimal parameters as is without discussing it. More formal methods of finding the optimal $\lambda$ are explored in \cite{Regularization_lambda_parameter_finding}, and the exploration of the effects of different parameter choices for the presented method are documented in \cite{WueestMScThesis}.
+
+More advanced avenues of implementing the Tikhonov regularization are explored\cite{Tikhonov_matrix}. 
 
 
 
@@ -412,7 +419,7 @@ While the method presented here is intended as a practical route toward cost‑e
 \appendix
 \section{Appendix}\label{My Appendix}
 
-\section{Longitudinal Velocity Components}\label{Appendix_V_yxz}
+\subsection{Longitudinal Velocity Components}\label{Appendix_V_yxz}
 In both simulation and real world experiments, only the out of plane components have been used. The real world setup used an LDV capable of also recording velocities in all three space directions. The method should in theory be able to use any of the three dimensions, or their sum as the measured quantities. This was not explored during the Simulation work, and in the real world experiment, these components showed high noise ratios, as well as many "dead" grid points without measurements for unknown systematic reasons, yielding non interpretable results. As such, we could not verify that this method extends to longitudinal wave components. 
 
 Exploration of this property could be practical in the case of pursuit of a practical SHM implementation. If the hypothesis holds that the sum of all three velocity components is a valid quantity for this method, in the case of curved surfaces, would remove the need to compute the out-of-plane component at various directions. The result would be a simplified implementation where the three-component velocity at every grid point could be fed directly from the LDV into the algorithm without accounting for the orientation of the surface at any given point. Further reading: \cite{WueestMScThesis}.
@@ -516,6 +523,8 @@ Figures \ref{fig:Dispersion} suggest phase velocities that increase with frequen
 
 The empirical estimates may be affected by measurement noise, limited angular sampling, and small alignment errors between calibration and monitoring. Conversely, the theoretical Lamb-mode calculation is only a rough ballpark because it assumes isotropic, homogeneous material properties and does not account for the plate's anisotropy or layup. Hence discrepancies between the two are to be expected and can be substantial. Neither approach alone provides a definitive ``ground truth.''
 
+A bigger concern may be that manually computing $dx/dt$ on Figure \ref{fig:Dispersion:a}, which corresponds more to the group velocity, yields a result of roughly 1700m/s. 
+
 For the purposes of this paper we only use phase-velocity/wavelength estimates as a rough reference to assess whether the observed localization is below the order‑of‑magnitude wavelength. At 50 kHz, the corresponding wavelengths are on the order of a few centimeters, and the observed localization ($\approx$2 cm) remains smaller than those wavelengths. Given that this comparison is only qualitative, we do not pursue a detailed velocity validation here.
 
 \subsection{Regarding Frequencies and reconstruction}\label{Appendix_Frequencies}
@@ -556,6 +565,14 @@ as well as an adjustment to the full defect vector $\mathbf{d}$ to hold two para
 where for $d_{k,b}$, $k$ denotes the grid location, and $b$ the basis vector at that location.
 
 This approach is not used in this paper, as we continue using a delta-like simplifies defect. Experiments in simulation work so far has not yielded many useful bases that significantly increased performance. Especially considering the computational costs associated with increasing the defect space, as well as since we are already working in highly underdetermined systems in this paper. See \cite{WueestMScThesis} for further discussions into different defect bases.
+
+\subsection{Sensor Configurations}\label{Appendix_sensor_configs}
+The sensor configuration used in this paper as described in section \ref{Operator assembly} are chosen as s [[1,2], [1,3], [1,4],
+[1,5], [2,3], [2,4], [2,5], [3,4], [3,5], [4,5] ]. For the echo configuration in Figure \ref{fig:ECHO}, it is [[1,1]]. The choice of the 5-sensor system is motivated by avoiding symmetric sets to be included, such as [[1,2],[2,1]], as due to the reciprocity assumption, do not provide additional significant useful information. Testing confirmed this to be the case.  
+\paragraph{}
+In hindsight, it would likely be better to use a basis layout such as [[1,2],[1,3],[2,3],[2,4],[3,4],...] to treat all emitters equally importantly. This was  thought of too late, but testing afterwards revealed no noticeable improvements when using such a configuration. Therefore, the results were kept.
+\paragraph{}
+The inclusion of a full set of measurements including self-measurements such as ([1,1],[2,2] etc.) should in theory improve the results, but testing shows a tendency to decrease the result quality, which is odd, given the single pulse cases \ref{fig:ECHO} do work, therefore the information should not be useless. 
 
 %\printcredits
 

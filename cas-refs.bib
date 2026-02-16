@@ -516,3 +516,38 @@ author = {Francisco Rotea, luispauloml},
 	note = {\_eprint: https://pubs.aip.org/aip/apl/article-pdf/doi/10.1063/1.2130720/13168422/204104\_1\_online.pdf},
 	pages = {204104},
 }
+
+
+
+
+
+
+
+@inbook{Regularization_lambda_parameter_finding,
+title = {5. Getting Serious: Choosing the Regularization Parameter},
+booktitle = {Discrete Inverse Problems},
+chapter = {},
+pages = {85-107},
+doi = {10.1137/1.9780898718836.ch5},
+URL = {https://epubs.siam.org/doi/abs/10.1137/1.9780898718836.ch5},
+eprint = {https://epubs.siam.org/doi/pdf/10.1137/1.9780898718836.ch5},
+    abstract = { At this stage we have at our disposal several regularization methods, based on filtering of the SVD components. We have also seen that for small problems it is often fairly straightforward to “eyeball” a good TSVD truncation parameter from the Picard plot. The main thing that we are still missing is a reliable and automated technique for choosing the regularization parameter, such as k (for TSVD) or λ (for Tikhonov). Specifically, what we would like is an efficient, robust, and reliable method for computing the regularization parameter from the given data, which does not require the computation of the SVD (which is infeasible for large problems) or any human inspection of a plot. Unfortunately, such a method has yet to be found; at the present time, no one has devised a general-purpose parameter-choice algorithm which will always produce a good k or λ, such that the regularized solution is a good approximation to the unattainable exact solution. What we currently have at our disposal is a collection of methods which, under certain assumptions, tend to work well; but all of them can and will occasionally fail to produce good results. We do not intend to cover all parameter-choice methods developed over the years; instead we focus on four different methods, each with its own background and motivation. We start with a discussion of the errors in the regularized solution, which serves as a motivation for the parameter-choice methods, and which naturally leads to the first two methods, namely, the discrepancy principle and the L-curve criterion. Next we describe two methods, generalized cross validation and the NCP method, both of which are rooted in a statistical description of the problem. We finish with a comparison of all the methods. More technical details and references for the first three methods can be found in [32]. It appears to be the first time the fourth method is presented in book form. As we already mentioned, there are many more parameter-choice methods around, based on a variety of principles, error estimates, and heuristics, and new methods are being developed as you read this book. }
+}
+
+
+
+
+
+
+
+@inbook{tikhonovintro,
+title = {4. Computational Aspects: Regularization Methods},
+booktitle = {Discrete Inverse Problems},
+chapter = {},
+pages = {53-83},
+doi = {10.1137/1.9780898718836.ch4},
+URL = {https://epubs.siam.org/doi/abs/10.1137/1.9780898718836.ch4},
+eprint = {https://epubs.siam.org/doi/pdf/10.1137/1.9780898718836.ch4},
+    abstract = { After the careful analysis that we carried out in the previous two chapters, we now have a good understanding of the difficulties associated with discrete ill-posed problems and why the “naive” solution can be expected to be useless. In this chapter we use this insight to devise several different methods for computing approximate solutions that are less sensitive to perturbations than the naive solution. These methods are called regularization methods because they enforce regularity on the computed solution—typically in the form of a requirement that the solution is smooth, in some sense. And by enforcing this regularity, or smoothness, we suppress some of the unwanted noise components, leading to more stable approximate solutions. Almost all the regularization methods treated in this book produce solutions which can be expressed as a filtered SVD expansion of the form xreg = ∑ i=1 n φi u i T b σi vi , 4.1 where φi are the filter factors associated with the method. These methods are commonly referred to as spectral filtering methods because, as we saw in Section 2.5, the SVD basis can be considered as a spectral basis. This chapter introduces three important spectral filtering methods: truncated SVD, selective SVD, and Tikhonov's method. We recall that the coefficient matrix A is allowed to have more rows than columns, i.e., A∈ ℝm×n withm≥n, and for m > n it is natural to consider the least squares problem minx ‖Ax − b‖2. Hence, when we use the phrase “naive solution” we mean either the solution A−1b (when m = n) or the least squares solution (when m > n), and we emphasize the convenient fact that the naive solution has precisely the same SVD expansion (3.11) in both cases. The expression for the condition number of A is also the same, namely, cond(A) = σ1/σn. Hence, there is really no need to distinguish between the cases m = n and m > n throughout. }
+}
+
