@@ -91,9 +91,11 @@
 
 
 \begin{abstract}
-We present an empirical, fully vectorized linear-operator framework for first order inverse scattering and validate it experimentally on a bidirectional carbon-fiber-reinforced polymer (CFRP) plate. The framework uses bonded piezoelectric transducers to emit periodic pulses and a Laser Doppler Vibrometer (LDV) for a one-time calibration scan, constructing source–receiver impulse-response operators. By enforcing a discrete, periodic time behavior, wave propagation is modeled as a circular convolution, diagonalizable via the discrete Fourier transform (DFT). Defect localization is then formulated as a Tikhonov-regularized linear inverse problem.
+We present an empirically calibrated, fully vectorized linear-operator framework for inverse scattering, motivated by challenges in non-destructive testing (NDT) and structural health monitoring (SHM) where reliable forward models are difficult to obtain and maintain. The method enables defect localization without requiring an explicit physical model of wave propagation. Source–receiver impulse-response operators are constructed through a one-time calibration using bonded piezoelectric transducers for excitation and dense Laser Doppler Vibrometer (LDV) measurements. Enforcing discrete periodic time behavior represents propagation as circular convolution, yielding circulant operators diagonalizable via the discrete Fourier transform (DFT) and allowing defect localization to be posed as a Tikhonov-regularized linear inverse problem using only sparse monitoring data.
 
-After calibration, monitoring uses only sparse LDV measurements at the transducer locations. An iron cube glued to the plate serves as a defect proxy and is localized to a sub wavelength resolution. Computation cost is concentrated to the one-time calibration, whereas, subsequent evaluations require minimal data and time. If the sparse measurements are implemented using piezoelectric sensors, it could enable fully automated structural health monitoring. The empirical-operator concept may extend to alternative detection systems or unconventional sensing interfaces (e.g., touch-like surfaces). The approach is model-free and broadly applicable where forward modeling or digital-twin upkeep is impractical.
+Experimental validation on a bidirectional carbon-fiber-reinforced polymer (CFRP) plate demonstrates sub-wavelength localization of a 1 cm³ adhered defect using measurements acquired solely at transducer locations after calibration. Computational cost is concentrated in the calibration stage, while subsequent evaluations reduce to rapid matrix–vector operations. Complementary simulations support the experimental results and illustrate performance across varying defect scenarios and sensing configurations.
+
+Relying only on linear time-invariant system assumptions, the framework provides a data-driven alternative for NDT and SHM in situations where maintaining accurate digital twins is impractical, and may extend to other wave-based sensing applications.
 \end{abstract}
 
 \begin{graphicalabstract}
@@ -134,59 +136,16 @@ This paper validates a novel method based on empirical linear operators\cite{Mat
 By designing the excitation to be strictly periodic and ensuring no other sources act on the object, the cyclic time embedding is valid by construction. We impose time periodic behavior in the setup, and thus the frequency treatment becomes equivalent to the time domain treatment.
 Within a single-scattering formulation, defect localization is solved via Tikhonov-regularized inverse\cite{Tikhonov}\cite{Tikhonov_matrix} using only sparse monitoring data at the transducer locations. We validate the approach experimentally on an anisotropic CFRP plate, demonstrating sub-wavelength localization from sparse measurements.
 
-
-\section{Experimental Setup }\label{Sec:Exp}
-The test specimen is a $26.8\,\mathrm{cm}\times26.8\ \times0.14\,\mathrm{cm}$ bi-directional CFRP plate (8 layers, [0°\textsubscript{2}/90°\textsubscript{2}]\textsubscript{s}, HexPly 8552/AS4). Five low-cost brass–ceramic piezoelectric discs with a diameter of 12mm are bonded to the plate using a Crystalbond adhesive. Exact formulation and bond thickness were not recorded. As shown in Section \ref{Empirical impulse responses}, the method is independent of the source transfer function, and thus works for a wide range of unknown coupling properties.
-\paragraph{}
-The drive is a periodic pulse train with a $2\,\mathrm{ms}$ repetition period, using a 80\,kHz Ricker wavelet as the pulse shape.  An LDV scans the plate on a $104\times104$ square grid, recording the full 3-component velocity vector over time. For this work, we use only the out of plane Vz component, which is excited strongest by the piezoelectric sources.   Figure~\ref{fig:Screenshot} shows one frame of such a measurement. The potential use of all three velocity components is discussed in \ref{Appendix_V_yxz}.
-\paragraph{}
-This scan is repeated for each of the five transducers, which constitute the one-time calibration step. Data are sampled at $625\,\mathrm{kHz}$ and low-pass filtered to 50\,kHz prior to computation. Each grid location is acquired with 10 repeats 5 separate times. I.e. we obtain 5 sets of measurements total, each having been averaged 10 times. All velocities are normalized by dividing all values by the maximum velocity recorded. The normalization increases numerical precision of floating point numbers in case of very high measurement numbers, and helps in having the optimal regularization parameter be of similar values for different systems, which will be introduced in section \ref{Regularized inversion}. As a result, the following plots such as Figure\ref{fig:Screenshot} use unitless velocities, and may not be consistent between different plots such as Figure\ref{fig:Dispersion:a} due to having a different global maxima chosen between different scripts. The normalization does not affect the results.
-
-
 \begin{figure}
   \centering
-  \includegraphics[width=0.5\linewidth]{Figures/Misc/LDV_Diag.png}
-  \caption{TODO: To be replaced with real world setup figs}
-  \label{fig:Diag_LDV}
+  \includegraphics[width=0.5\linewidth]{Figures/Misc/diagram.png}
+  \caption{Visualization on how a source at location $j$ propagates to a defect at location $k$, which then re-emits the wave. Afterwards, it propagates to a receiver location $i$. As an equation, the image visualizes $\vec{m}_i = \vec{g}_{kj}\ast\vec{d}_k\ast\vec{g}_{ik}\ast\vec{s}_j$.}
+  \label{fig:Diag}
 \end{figure}
-
-\paragraph{}
-
-After calibration, a $1\,\mathrm{cm}^3$ iron cube is bonded to the plate to simulate a defect. During monitoring, we excite each transducer again but measure only at the transducer locations. In our setup, the LDV acquires these sparse responses at the transducer positions. 
-\paragraph{}
-For future discussion regarding sub-wavelength localization, we roughly estimate the dispersion properties of the CFRP plate. We extract an x--t slice along the x--axis at y=6.2cm through the active transducer from Figure~\ref{fig:Screenshot} and window the time axis to exclude edge reflections (Figure~\ref{fig:Dispersion:b}). We then compute a 2D FFT to obtain the $k$--$\omega$ spectrum. Selecting the peak-energy wavenumber $k^*(f)$ for each frequency yields the phase velocity $v_p(f)=2\pi f/k^*(f)$ and wavelength $\lambda(f)=2\pi/k^*(f)$ (Figure~\ref{fig:Dispersion:a}). See Appendix~\ref{Appendix_Dispersion_Curve} for further comments regarding the validity of the phase velocities. 
-
-
-
-\begin{figure}
-  \centering
-  \includegraphics[width=0.56\linewidth]{Figures/Raw_data/150khz_Defect_0.17ms.png}
-  \caption{Snapshot of the measured wavefield propagating in the CFRP plate at $t = 0.17$ ms, lowpass filtered to 150 kHz. Red diamonds mark the five transducers (numbered 1--5). Transducer 5 is the active source in this instance. The green square indicates the location where the defect was bonded in the monitoring phase (not yet present in this calibration scan). Note: The results in this paper employ 1--50 kHz bandpass filtering, which significantly distorts the pulse shape compared to this view. (See Appendix~\ref{Appendix_50khz_pulse}.})
-  \label{fig:Screenshot}
-\end{figure}
-
-\begin{figure}
-  \begin{subfigure}{0.48\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{Figures/Dispersion_curve/space_time_slice_src5_xaxis.png}
-    \caption{Space-time diagram along the y = 0.62m plane through the active sensor nr 5, derived from the same data as Figure \ref{fig:Screenshot}.}
-    \label{fig:Dispersion:b}
-  \end{subfigure}\hfill
-  \centering
-  \begin{subfigure}{0.48\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{Figures/Dispersion_curve/dispersion_dual_axis_src5_xaxis.png}
-    \caption{Phase velocity $v_p$ (blue, left axis, m/s) and wavelength $\lambda$ (red, right axis, mm) versus frequency $f$ (kHz). Due to anisotropy, the values are to be seen as approximate.}
-    \label{fig:Dispersion:a}
-  \end{subfigure}
-  
-  \caption{Empirical dispersion of the CFRP plate from the calibration scan.}
-  \label{fig:Dispersion}
-\end{figure}
-
-
 
 \section{Mathematical framework}\label{Mathematical framework}
+Before presenting the experimental results, we first introduce the mathematical framework underlying the proposed defect-detection approach.
+
 \subsection{System assumptions}\label{System assumptions}
 We assume: (i) linearity; (ii) time invariance; (iii) reciprocity; (iv) practical flatness (LDV access); and (v) the ability to control the excitation of the material relative to noise.
 
@@ -241,12 +200,7 @@ Since defects also satisfy the assumptions in Section~\ref{System assumptions}, 
 
 % The model in general can be expanded upon to richer reflection models, with any basis of vectors as potential solutions, and has been implemented to with this capability, but no useful bases have been found (That at least justify the higher computational cost), and as such, all results shown in this paper use the simple delta basis.  The generalization to richer local bases is presented in Section~\ref{Generalization to arbitrary defect bases}.
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.5\linewidth]{Figures/Misc/diagram.png}
-  \caption{Visualization on how a source at location $j$ propagates to a defect at location $k$, which then re-emits the wave. Afterwards, it propagates to a receiver location $i$. As an equation, the image visualizes $\vec{m}_i = \vec{g}_{kj}\ast\vec{d}_k\ast\vec{g}_{ik}\ast\vec{s}_j$.}
-  \label{fig:Diag}
-\end{figure}
+
 
 
 
@@ -336,33 +290,85 @@ To isolate this effect, we choose $\Gamma$ to be diagonal. Entries corresponding
 
 The optimal regularization parameter $\lambda$ in this paper is chosen with no particular method. In the examples of this paper, we are presenting the solution using the optimal parameters as is without discussing it. More formal methods of finding the optimal $\lambda$ are explored in \cite{Regularization_lambda_parameter_finding}, and the exploration of the effects of different parameter choices for the presented method are documented in \cite{WueestMScThesis}.
 
+\section{Experimental Setup }\label{Sec:Exp}
+The test specimen is a $26.8\,\mathrm{cm} \times 26.8\ \times 0.14\,\mathrm{cm}$ bi-directional CFRP plate (8 layers, [0°\textsubscript{2}/90°\textsubscript{2}]\textsubscript{s}, HexPly 8552/AS4). Five low-cost brass–ceramic piezoelectric discs with a diameter of 12mm were bonded to the plate using a Crystalbond adhesive. As shown in Section \ref{Empirical impulse responses}, the method is independent of the source transfer function, and thus works for a wide range of unknown coupling properties.
+\paragraph{}
+The actuators were driven via a periodic pulse train with a $2\,\mathrm{ms}$ repetition period, using a 80\,kHz Ricker wavelet as the pulse shape. A 3D LDV was used to scan the plate on a $104\times104$ square grid, recording the full 3-component velocity vector over time. Figure~\ref{fig:Screenshot} shows one frame of the measurement. For this work, we use only the out of plane Vz component, which is excited strongest by the piezoelectric sources. The potential use of all three velocity components is discussed in \ref{Appendix_V_yxz}.
+\paragraph{}
+This scan was repeated for each of the five transducers, which constitute the one-time calibration step. Data were sampled at $625\,\mathrm{kHz}$ and low-pass filtered to 50\,kHz prior to computation. Each grid location was acquired with 10 repeats 5 separate times. I.e. we obtain 5 sets of measurements total, each having been averaged 10 times. All velocities are normalized by dividing all values by the maximum velocity recorded. The normalization increases numerical precision of floating point numbers in case of very high measurement numbers, and helps in having the optimal regularization parameter be of similar values for different systems, which will be introduced in section \ref{Regularized inversion}. As a result, the following plots such as Figure\ref{fig:Screenshot} use unitless velocities, and may not be consistent between different plots such as Figure\ref{fig:Dispersion:a} due to having a different global maxima chosen between different scripts. The normalization does not affect the results.
+
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\linewidth]{Figures/Misc/LDV_Diag.png}
+  \caption{TODO: To be replaced with real world setup figs}
+  \label{fig:Diag_LDV}
+\end{figure}
+
+\paragraph{}
+
+After calibration, a $1\,\mathrm{cm}^3$ iron cube is bonded to the plate to simulate a defect. During monitoring, we excite each transducer again but measure only at the transducer locations. In our setup, the LDV acquires these sparse responses at the transducer positions. 
+\paragraph{}
+For future discussion regarding sub-wavelength localization, we roughly estimate the dispersion properties of the CFRP plate. We extract an x--t slice along the x--axis at y=6.2cm through the active transducer from Figure~\ref{fig:Screenshot} and window the time axis to exclude edge reflections (Figure~\ref{fig:Dispersion:b}). We then compute a 2D FFT to obtain the $k$--$\omega$ spectrum. Selecting the peak-energy wavenumber $k^*(f)$ for each frequency yields the phase velocity $v_p(f)=2\pi f/k^*(f)$ and wavelength $\lambda(f)=2\pi/k^*(f)$ (Figure~\ref{fig:Dispersion:a}). See Appendix~\ref{Appendix_Dispersion_Curve} for further comments regarding the validity of the phase velocities. 
+
+
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.56\linewidth]{Figures/Raw_data/150khz_Defect_0.17ms.png}
+  \caption{Snapshot of the measured wavefield propagating in the CFRP plate at $t = 0.17$ ms, lowpass filtered to 150 kHz. Red diamonds mark the five transducers (numbered 1--5). Transducer 5 is the active source in this instance. The green square indicates the location where the defect was bonded in the monitoring phase (not yet present in this calibration scan). Note: The results in this paper employ 1--50 kHz bandpass filtering, which significantly distorts the pulse shape compared to this view. (See Appendix~\ref{Appendix_50khz_pulse}.)} 
+  \label{fig:Screenshot}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Dispersion_curve/space_time_slice_src5_xaxis.png}
+    \caption{Space-time diagram along the y = 0.62m plane through the active sensor nr 5, derived from the same data as Figure \ref{fig:Screenshot}.}
+    \label{fig:Dispersion:b}
+  \end{subfigure}\hfill
+  \centering
+  \begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Dispersion_curve/dispersion_dual_axis_src5_xaxis.png}
+    \caption{Phase velocity $v_p$ (blue, left axis, m/s) and wavelength $\lambda$ (red, right axis, mm) versus frequency $f$ (kHz). Due to anisotropy, the values are to be seen as approximate.}
+    \label{fig:Dispersion:a}
+  \end{subfigure}
+  
+  \caption{Empirical dispersion of the CFRP plate from the calibration scan.}
+  \label{fig:Dispersion}
+\end{figure}
+
+
+
+
 \section{Results}
  We first present successful defect localization using the experimental setup described in Section \ref{Sec:Exp}. This is followed by an evaluation of the methods capabilities in locating different types of defects utilizing numerical data. 
 
 \subsection{Results - Experimental Validation}\label{Results}
 
-% Figure~\ref{fig:Results_normal} shows the reconstructed defect vector $\vec{\mathbf{d}}$, where each pixel represents the absolute value at a spatial grid point, i.e., LDV measurement location. After solving equation~\ref{full_system}, the resulting vector assigns a reflection amplitude to every grid point. In this case, the vector has $101\times104 = 10,816$ entries, one per grid point. For visualization, each grid point is mapped back onto the 2D plane according to its original arrangement. The heatmap displays the absolute value at each location, which can be interpreted as the amplitude with which the incoming wave is reflected. No phase information is preserved, as the vector is complex-valued. The algorithm does not know the spatial correspondence of each index, and the system is not restricted to a 2D plane.
+Figure~\ref{fig:Results_normal} shows the reconstructed defect vector $\vec{\mathbf{d}}$, visualized as a heatmap of its magnitude at each spatial grid point (LDV measurement location). Solving equation~\ref{full_system} yields a complex-valued coefficient for every grid point, interpreted here as a local reflection amplitude. In this experiment, $\vec{\mathbf{d}}$ contains $101\times104 = 10,816$ entries. For visualization, the 1D indexing is mapped back to the original 2D arrangement of the scan grid. Since the plot shows $|\vec{\mathbf{d}}|$, phase information is not displayed. The inversion itself is agnostic to geometry: it operates on the indexed set of points and is not intrinsically restricted to a 2D plane.
 
-% The defect in Figure~\ref{fig:Results_normal} is clearly localized near the target location (yellow square). Small black regions appear around each transducer (red diamonds). These exclusion zones correspond to the unpenalized region in the regularization (Section~\ref{Regularized inversion}) and are masked in the visualization. Behind this mask, the heatmap would show very high values, but these mostly reflect systematic errors in the experiment setup, such as differences in pulse amplitude between calibration and monitoring.
+ The defect in Figure~\ref{fig:Results_normal} is localized near the target location (yellow square). Small black regions around each transducer (red diamonds) indicate exclusion zones, corresponding to the unpenalized region in the regularization (Section~\ref{Regularized inversion}) and masked in the visualization. Without this masking, these areas would exhibit large reconstructed values that primarily capture systematic experimental differences (e.g., pulse-amplitude changes between calibration and monitoring) rather than defect scattering.
 
-% The result demonstrates successful localization of the $1\times1\times1\,\mathrm{cm}^3$ iron cube using only sparse measurements at the five transducer locations. The particle velocity data was bandpass filtered to 1--50 kHz and processed via the Tikhonov-regularized inversion described in Section~\ref{Regularized inversion}.
+ Overall, the $1\times1\times1\,\mathrm{cm}^3$ iron cube is successfully localized using only sparse measurements at the five transducer locations. The particle velocity data were bandpass filtered to 1--50 kHz and processed using the Tikhonov-regularized inversion described in Section~\ref{Regularized inversion}.
 
-% Figure~\ref{fig:Results_side} provides cross-sectional views along the x-axis. Slices exceeding 0.6 times the maximum amplitude are retained, and their envelope is drawn. This threshold identifies the localization width: the defect signature has a half-width of approximately 2 cm.
+ Figure~\ref{fig:Results_side} provides cross-sectional views along the x-axis. Slices exceeding 0.6 times the maximum amplitude are retained and used to draw an envelope. Under this criterion, the defect signature exhibits a half-width of approximately 2 cm.
 
-% A 15kHz evaluation can be seen in Appendix \ref{Appendix_50khz_pulse}.
+ A 15 kHz evaluation can be seen in Appendix \ref{Appendix_50khz_pulse}.
 
-Figure~\ref{fig:Results_normal} shows the reconstructed defect vector $\vec{\mathbf{d}}$, in which each pixel represents the absolute value at a spatial grid point corresponding to an LDV measurement location. Solving equation~\ref{full_system} assigns a reflection amplitude to each grid point, resulting in a vector containing $104\times104 = 10{,}816$ entries. For visualization, these entries are mapped back onto the two-dimensional plane according to their original spatial arrangement. The heatmap therefore represents the magnitude of the reconstructed scattering response at each location and may be interpreted as a relative reflection amplitude within the assumptions of the linear forward model. Although the reconstructed vector is complex-valued, only its magnitude is displayed for clarity. The inversion itself operates in index space and does not explicitly rely on spatial ordering.
+%Figure~\ref{fig:Results_normal} shows the reconstructed defect vector $\vec{\mathbf{d}}$, in which each pixel represents the absolute value at a spatial grid point corresponding to an LDV measurement location. Solving equation~\ref{full_system} assigns a reflection amplitude to each grid point, resulting in a vector containing $104\times104 = 10{,}816$ entries. For visualization, these entries are mapped back onto the two-dimensional plane according to their original spatial arrangement. The heatmap therefore represents the magnitude of the reconstructed scattering response at each location and may be interpreted as a relative reflection amplitude within the assumptions of the linear forward model. Although the reconstructed vector is complex-valued, only its magnitude is displayed for clarity. The inversion itself operates in index space and does not explicitly rely on spatial ordering.
 %; spatial structure is introduced only during visualization, and the formulation is not inherently restricted to two-dimensional geometries.
 
-The defect in Figure~\ref{fig:Results_normal} is clearly localized near the target location (yellow square). Small black regions surrounding each transducer (red diamonds) correspond to exclusion zones defined by the unpenalized region in the regularization (Section~\ref{Regularized inversion}) and are masked in the visualization. Without masking, these regions would exhibit high amplitudes primarily caused by systematic experimental effects, such as differences in pulse amplitude between calibration and monitoring measurements. Consequently, these areas are excluded, as they do not represent physically meaningful scattering locations but arise from source–receiver coupling and experimental bias.
+%The defect in Figure~\ref{fig:Results_normal} is clearly localized near the target location (yellow square). Small black regions surrounding each transducer (red diamonds) correspond to exclusion zones defined by the unpenalized region in the regularization (Section~\ref{Regularized inversion}) and are masked in the visualization. Without masking, these regions would exhibit high amplitudes primarily caused by systematic experimental effects, such as differences in pulse amplitude between calibration and monitoring measurements. Consequently, these areas are excluded, as they do not represent physically meaningful scattering locations but arise from source–receiver coupling and experimental bias.
 
-The results demonstrate successful localization of the $1\times1\times1,\mathrm{cm}^3$ iron cube using sparse measurements from only five transducer locations. Here, localization refers to accurate recovery of the defect position, whereas the spatial extent of the reconstructed signature remains limited by the available bandwidth and measurement aperture. The particle-velocity data were bandpass filtered between 1 and 50 kHz and processed using the Tikhonov-regularized inversion described in Section~\ref{Regularized inversion}.
+%The results demonstrate successful localization of the $1\times1\times1,\mathrm{cm}^3$ iron cube using sparse measurements from only five transducer locations. Here, localization refers to accurate recovery of the defect position, whereas the spatial extent of the reconstructed signature remains limited by the available bandwidth and measurement aperture. The particle-velocity data were bandpass filtered between 1 and 50 kHz and processed using the Tikhonov-regularized inversion described in Section~\ref{Regularized inversion}.
 
 %Figure~\ref{fig:Results_side} presents cross-sectional views along the x-axis. Regions exceeding 0.6 times the maximum amplitude are retained, and their envelope is plotted to estimate the localization width. The threshold was chosen empirically to balance noise suppression and preservation of spatial extent. The reconstructed defect signature exhibits an approximate half-width of 2 cm.
 
-Figure~\ref{fig:Results_side} provides cross-sectional views along the x-axis. Slices exceeding 0.6 times the maximum amplitude are retained, and their envelope is plotted to estimate the localization width. This threshold identifies the localization width: the defect signature has a half-width of approximately 2 cm.
+%Figure~\ref{fig:Results_side} provides cross-sectional views along the x-axis. Slices exceeding 0.6 times the maximum amplitude are retained, and their envelope is plotted to estimate the localization width. This threshold identifies the localization width: the defect signature has a half-width of approximately 2 cm.
 
-A 15 kHz evaluation is provided in Appendix~\ref{Appendix_50khz_pulse}.
+%A 15 kHz evaluation is provided in Appendix~\ref{Appendix_50khz_pulse}.
 
 \begin{figure}
   \begin{subfigure}{0.48\linewidth}
