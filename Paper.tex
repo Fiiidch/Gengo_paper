@@ -135,7 +135,7 @@ By designing the excitation to be strictly periodic and ensuring no other source
 Within a single-scattering formulation, defect localization is solved via Tikhonov-regularized inverse\cite{Tikhonov}\cite{Tikhonov_matrix} using only sparse monitoring data at the transducer locations. We validate the approach experimentally on an anisotropic CFRP plate, demonstrating sub-wavelength localization from sparse measurements.
 
 
-\section{Methodology}
+\section{Experimental Setup }\label{Sec:Exp}
 The test specimen is a $26.8\,\mathrm{cm}\times26.8\ \times0.14\,\mathrm{cm}$ bi-directional CFRP plate (8 layers, [0°\textsubscript{2}/90°\textsubscript{2}]\textsubscript{s}, HexPly 8552/AS4). Five low-cost brass–ceramic piezoelectric discs with a diameter of 12mm are bonded to the plate using a Crystalbond adhesive. Exact formulation and bond thickness were not recorded. As shown in Section \ref{Empirical impulse responses}, the method is independent of the source transfer function, and thus works for a wide range of unknown coupling properties.
 \paragraph{}
 The drive is a periodic pulse train with a $2\,\mathrm{ms}$ repetition period, using a 80\,kHz Ricker wavelet as the pulse shape.  An LDV scans the plate on a $104\times104$ square grid, recording the full 3-component velocity vector over time. For this work, we use only the out of plane Vz component, which is excited strongest by the piezoelectric sources.   Figure~\ref{fig:Screenshot} shows one frame of such a measurement. The potential use of all three velocity components is discussed in \ref{Appendix_V_yxz}.
@@ -153,15 +153,15 @@ This scan is repeated for each of the five transducers, which constitute the one
 \paragraph{}
 
 After calibration, a $1\,\mathrm{cm}^3$ iron cube is bonded to the plate to simulate a defect. During monitoring, we excite each transducer again but measure only at the transducer locations. In our setup, the LDV acquires these sparse responses at the transducer positions. 
-
-For future discussion regarding sub-wavelength localization, we estimate the dispersion properties of the CFRP plate. We extract an x--t slice along the x--axis at y=0.62m through the active transducer from Figure~\ref{fig:Screenshot} and window the time axis to exclude edge reflections (Figure~\ref{fig:Dispersion:b}). We then compute a 2D FFT to obtain the $k$--$\omega$ spectrum. Selecting the peak-energy wavenumber $k^*(f)$ for each frequency yields the phase velocity $v_p(f)=2\pi f/k^*(f)$ and wavelength $\lambda(f)=2\pi/k^*(f)$ (Figure~\ref{fig:Dispersion:a}). See Appendix~\ref{Appendix_Dispersion_Curve} for further comments regarding the validity of the phase velocities. 
+\paragraph{}
+For future discussion regarding sub-wavelength localization, we roughly estimate the dispersion properties of the CFRP plate. We extract an x--t slice along the x--axis at y=6.2cm through the active transducer from Figure~\ref{fig:Screenshot} and window the time axis to exclude edge reflections (Figure~\ref{fig:Dispersion:b}). We then compute a 2D FFT to obtain the $k$--$\omega$ spectrum. Selecting the peak-energy wavenumber $k^*(f)$ for each frequency yields the phase velocity $v_p(f)=2\pi f/k^*(f)$ and wavelength $\lambda(f)=2\pi/k^*(f)$ (Figure~\ref{fig:Dispersion:a}). See Appendix~\ref{Appendix_Dispersion_Curve} for further comments regarding the validity of the phase velocities. 
 
 
 
 \begin{figure}
   \centering
   \includegraphics[width=0.56\linewidth]{Figures/Raw_data/150khz_Defect_0.17ms.png}
-  \caption{Snapshot of the CFRP plate at $t = 0.17$ ms, lowpass filtered to 150 kHz. Red diamonds mark the five transducers (numbered 1--5). Transducer 5 is the active source. The green square indicates the location where the defect was bonded in the monitoring phase (not yet present in this calibration scan). Note: The results in this paper employ 1--50 kHz bandpass filtering, which significantly distorts the pulse shape compared to this view. see Appendix~\ref{Appendix_50khz_pulse}.}
+  \caption{Snapshot of the measured wavefield propagating in the CFRP plate at $t = 0.17$ ms, lowpass filtered to 150 kHz. Red diamonds mark the five transducers (numbered 1--5). Transducer 5 is the active source in this instance. The green square indicates the location where the defect was bonded in the monitoring phase (not yet present in this calibration scan). Note: The results in this paper employ 1--50 kHz bandpass filtering, which significantly distorts the pulse shape compared to this view. (See Appendix~\ref{Appendix_50khz_pulse}.})
   \label{fig:Screenshot}
 \end{figure}
 
@@ -176,7 +176,7 @@ For future discussion regarding sub-wavelength localization, we estimate the dis
   \begin{subfigure}{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{Figures/Dispersion_curve/dispersion_dual_axis_src5_xaxis.png}
-    \caption{Phase velocity $v_p$ (blue, left axis, m/s) and wavelength $\lambda$ (red, right axis, mm) versus frequency $f$ (kHz). }
+    \caption{Phase velocity $v_p$ (blue, left axis, m/s) and wavelength $\lambda$ (red, right axis, mm) versus frequency $f$ (kHz). Due to anisotropy, the values are to be seen as approximate.}
     \label{fig:Dispersion:a}
   \end{subfigure}
   
@@ -190,7 +190,7 @@ For future discussion regarding sub-wavelength localization, we estimate the dis
 \subsection{System assumptions}\label{System assumptions}
 We assume: (i) linearity; (ii) time invariance; (iii) reciprocity; (iv) practical flatness (LDV access); and (v) the ability to control the excitation of the material relative to noise.
 
-Assumptions (i), (ii), and (iii) are naturally satisfied for mechanical waves under standard conditions. Assumption (iv) refers to geometries where the object thickness is small relative to its lateral dimensions, typically valid for plate-like components such as aircraft fuselage panels and shell structures. Assumption (v) simply requires controlled excitation capability, which is standard in active NDT configurations using piezoelectric or electromagnetic transducers.
+Assumptions (i), (ii), and (iii) are naturally satisfied for mechanical waves under standard conditions. Assumption (iv) refers to geometries where the object thickness is small relative to its lateral dimensions, typically valid for plate-like components such as aircraft fuselage panels and shell structures. Assumption (v) simply requires a controlled excitation capability, which is standard in active NDT configurations using piezoelectric or electromagnetic transducers.
 
 \subsection{Terminology and Notation}
 We work with discrete-time vectors and matrices throughout. The spatial domain is discretized into a set of points indexed by integers without implying any particular geometric arrangement. For instance, a 100×100 scan grid of a square plate yields 10,000 points labeled 1 through 10,000, with the specific mapping arbitrary, but fixed.
@@ -211,18 +211,18 @@ g_1 & g_0 & \cdots & g_2 \\
 g_{n-1} & g_{n-2} & \cdots & g_0
 \end{pmatrix}
 \end{equation}
-so that $G_{ij}\vec v = \vec g_{ij} * \vec v$ (circular convolution). All such operators are diagonalized by the discrete Fourier transform (DFT), enabling component-wise multiplication in frequency.
+so that $G_{ij}\vec v = \vec g_{ij} * \vec v$ (circular convolution). All such operators are diagonalized by the discrete Fourier transform (DFT), enabling component-wise multiplication in the frequency domain.
 
 
 
 \subsection{Empirical impulse responses}\label{Empirical impulse responses}
-We do not separate an ``ideal'' injected waveform from local reverberations at a transducer. The self-measured periodic signal $\vec s_s$ is taken as the source vector. For a transducer $s$ and measurement point $i$ (grid or other transducer), the response is modeled as a circular convolution:
+For a transducer $s$ and measurement point $i$ (grid or other transducer), the response is modeled as a circular convolution:
 \begin{equation}\label{eq:empirical_conv}
-\vec m_{i} = G_{is} \vec s_s = g_{ij}\ast\vec s_s
+\vec m_{i} = G_{is} \vec s_s = \vec g_{is}\ast\vec s_s
 \end{equation}
 where $G_{is}$ is circulant (first column $\vec g_{is}$). Directional (mode) decomposition is intentionally omitted because the LDV records only the scalar out-of-plane velocity at each sampled point.
 
-$\vec g_{ij}$ is computed as the regularized least squared solution of equation \ref{eq:empirical_conv} of multiple sets of noisy measurements. the solution to which can be computed in the frequency domain component wise: Let $\{(\vec s_{s,p}, \vec m_{i\mid s,p})\}_{p=1}^P$ denote $P$ repeated acquisitions. In the frequency domain (hats denote DFT components), for each frequency bin $f$ we solve the Tikhonov-regularized least-squares problem in frequency domain:
+Both $\vec m_{i}$ and $\vec G_{is}$ are obtained from measurements. The impulse response of the medium $\vec g_{ij}$ is then calculated as the regularized least squares solution of equation \ref{eq:empirical_conv} of multiple sets of noisy measurements. The solution can be computed component wise in the frequency domain: Let $\{(\vec s_{s,p}, \vec m_{i\mid s,p})\}_{p=1}^P$ denote $P$ repeated acquisitions. In the frequency domain (hats denote DFT components), for each frequency bin $f$ we solve the Tikhonov-regularized least-squares problem in frequency domain:
 \begin{equation}\label{Tikhonov_impulse}
 \min_{\hat{g}_{is}(f)} \sum_{p=1}^P \left| \hat{m}_{i\mid s,p}(f) - \hat{s}_{s,p}(f) \hat{g}_{is}(f) \right|^2 + \alpha |\hat{g}_{is}(f)|^2
 \end{equation}
@@ -230,12 +230,16 @@ with regularization parameter $\alpha > 0$. The closed-form solution is:
 \begin{equation}
 \hat{g}^{\mathrm{reg}}_{is}(f) = \frac{\sum_p \overline{\hat{s}_{s,p}(f)}\, \hat{m}_{i\mid s,p}(f)}{\sum_p |\hat{s}_{s,p}(f)|^2 + \alpha}
 \end{equation}
-The result is a stabilized impulse-response function that does not rely on assuming specific noise characteristics. $\alpha$ must just be a small number to assert no singularity errors happen. The exact choice does not affect the final solution in any noticeable ways.
+The result is a stabilized impulse-response function that does not rely on assuming specific noise characteristics. $\alpha$ must just be a small number ($\approx 10^{-7}$) to assert no singularity errors happen. The exact choice does not affect the final solution in any noticeable ways.
+\paragraph{}
+The impulse response is called ``empirical'' in the sense that the source signal $\vec s_s$ is the entire time-domain waveform recorded at the source position. In other words, we do not distinguish between the energy injected by the piezo and the subsequent local reverberations in the measured signal.
+%the source signal Ss used, comprises the whole time domain signal recorded at the source position. I.e., we do not differentiate between injected energy by the piezo and measured reverberations.  
+ 
 
 \subsection{Defect model}\label{Defect model}
-Since defects also satisfy the assumptions in Section~\ref{System assumptions}, their effects can be modeled using circular convolutions. Within the single-scattering (Born-type) approximation, the scattering process is illustrated in Fig.~\ref{fig:Diag}. We assume a \emph{delta-like} temporal reflection kernel, so each defect is represented by a scalar amplitude $d_k$ at its spatial location. Algebraically, this corresponds to selecting only the first canonical temporal basis vector $\vec d_ k = \vec e_0$, and physically, it corresponds to a defect position re-emitting the incoming wave immediately. 
+Since defects also satisfy the assumptions in Section~\ref{System assumptions}, their effects can be modeled using circular convolutions. Within the single-scattering (Born-type) approximation, the scattering process is illustrated in Fig.~\ref{fig:Diag}. We assume a \emph{delta-like} temporal reflection kernel, so each defect is represented by a scalar amplitude $d_k$ at its spatial location. Algebraically, this corresponds to selecting only the first canonical temporal basis vector $\vec d_ k = \vec e_0$, and physically, it corresponds to a defect position re-emitting the incoming wave immediately.  See section \ref{Generalization to arbitrary defect bases} for a generalization of this approach.
 
-The model in general can be expanded upon to richer reflection models, with any basis of vectors as potential solutions, and has been implemented to with this capability, but no useful bases have been found (That at least justify the higher computational cost), and as such, all results shown in this paper use the simple delta basis.  The generalization to richer local bases is presented in Section~\ref{Generalization to arbitrary defect bases}.
+% The model in general can be expanded upon to richer reflection models, with any basis of vectors as potential solutions, and has been implemented to with this capability, but no useful bases have been found (That at least justify the higher computational cost), and as such, all results shown in this paper use the simple delta basis.  The generalization to richer local bases is presented in Section~\ref{Generalization to arbitrary defect bases}.
 
 \begin{figure}
   \centering
@@ -247,7 +251,7 @@ The model in general can be expanded upon to richer reflection models, with any 
 
 
 \subsection{Operator assembly}\label{Operator assembly}
-For an emitter at $j$ and a measurement at $i$, the measured signal consists of a direct propagation term and first-order (single-scattered) contributions, as illustrated in Fig.~\ref{fig:Diag}:
+For an emitter at position $j$ and a measurement at position $i$, the measured signal consists of a direct propagation term and first-order (single-scattered) contributions, as illustrated in Fig.~\ref{fig:Diag}:
 \begin{equation}
 \vec m_i = \vec{g}_{ij}\ast\vec s_j + \sum_{k=1}^N \vec{g}_{ik} \ast \vec{d}_k \ast\vec{g}_{kj}\ast \vec s_j.
 \end{equation}
@@ -298,56 +302,67 @@ For multiple sensor-emitter pairs, "stacking "the selected $(i,j)$ pairs yields 
 \begin{bmatrix}
 \Delta \vec m_{1 2} \\
 \Delta \vec m_{1 3} \\
-\end{bmatrix},\qquad
+\end{bmatrix}\qquad
 L_{\mathrm{full}} =
 \begin{bmatrix}
 L_{1 2} \\
 L_{1 3} \\
 \end{bmatrix}
 \qquad
-\mathbf{\vec m}_{\mathrm{full}} = L_{\mathrm{full}} \vec{\mathbf{d}},
+\mathbf{\vec m}_{\mathrm{full}} = L_{\mathrm{full}} \vec{\mathbf{d}}
 \end{equation}
-Which corresponds to a [[1,2][1,3]] system.
-\paragraph{}
-In the examples shown in this paper in sections \ref{Results}, \ref{Appendix_Simulation_Results}, the systems with 5 sensors are set up as [
-    [1,2], [1,3], [1,4], [1,5],
-    [2,3], [2,4], [2,5],
-    [3,4], [3,5],
-    [4,5]
-], effectively using 10 measurements. (Futher discussion \ref{Appendix_sensor_configs})
 
-We have reduced the problem statement to the linear system in \eqref{full_system}. The only approximations made are the discretization of space, the assumption of first-order scattering and immediate reflection.
+Which corresponds to a [[1,2][1,3]] system. The general case can be much much larger, as in our cases presented, will be using 5 transducers with 10 total emitter-sensor pairings. (See appendix \ref{Appendix_sensor_configs} for details)
+\paragraph{}
+
+We have reduced the problem statement to the linear system in equation \eqref{full_system}. The only approximations made are the discretization of space, the assumption of first-order scattering and immediate reflection property of defects.
 
 
 
 \subsection{Regularized inversion}\label{Regularized inversion}
-Let $\mathcal{L} = L_{\mathrm{full}}$ and $\mathbf{m} = \mathbf{m}_{\mathrm{full}}$ from equation \ref{full_system}. We solve the linear inverse problem by finding $\mathbf{\vec d}$ to minimize following expression:
+We solve for $\vec{\mathbf{d}}$ in equation \ref{full_system}.  Let $\mathcal{L} = L_{\mathrm{full}}$ and $\mathbf{m} = \mathbf{m}_{\mathrm{full}}$ from equation \ref{full_system}. We solve the linear inverse problem by finding $\mathbf{\vec d}$ to minimize following expression:
 \begin{equation}\label{eq:objective}
 \text{argmin}_{\vec{\textbf{d}}} \; \|\mathcal{L}\mathbf{\vec d} - \mathbf{\vec m}\|_2^2 + \lambda \| \Gamma \mathbf{\vec d} \|_2^2,
 \end{equation}
-where $\Gamma \succeq 0$ specifies the penalty metric (a weighting / masking matrix) and $\lambda>0$ controls the trade-off between data fit and stabilization. The normal equations yield the closed form \cite{tikhonovintro} \cite{Matrix_formalism_tikhonov}
+where $\Gamma$ specifies the penalty metric (a weighting / masking matrix) and $\lambda>0$ controls the trade-off between data fit and stabilization. The normal equations yield the closed form \cite{tikhonovintro} \cite{Matrix_formalism_tikhonov}
 \begin{equation}\label{eq:tik_gamma}
 \vec{\mathbf{d}} = (\mathcal{L}^T \mathcal{L} + \lambda \Gamma)^{-1} \mathcal{L}^T \mathbf{\vec m}.
 \end{equation}
 The solution can computed directly iteratively, or by first computing the matrix $(\mathcal{L}^T \mathcal{L} + \lambda \Gamma)^{-1} \mathcal{L}^T$ (more expensive), and saving it. Allowing a rapid computation of $\vec{\mathbf{d}}$ though a matrix vector multiplication of many new measurement sets $\mathbf{\vec m}$.
 
-We use $\Gamma$ as a diagonal with ones everywhere except zeros at transducer locations along with a small exclusion zone around them, so those coefficients are not penalized. This allows the inversion to self-correct for slight inconsistencies in the emitter pulse form. When plotting the defect vector as a heatmap during evaluation, these regions are omitted from the plot by setting to 0, as otherwise, these regions would dominate the results.
+If $\Gamma$ is the identity matrix, we recover standard Tikhonov regularization, which penalizes the Euclidean norm $\|\vec{\mathbf{d}}\|_2^2$. In practice, however, real systems can show small changes in pulse shape and amplitude between calibration and monitoring. The inversion would then explain these differences by placing strong ``defects'' directly at or near the transducer locations, which contaminates the rest of the reconstruction.
+
+To isolate this effect, we choose $\Gamma$ to be diagonal. Entries corresponding to grid points at the transducers, and in a small neighborhood around them, are set to zero, all other diagonal entries are set to one. Coefficients in these unpenalized regions can adjust to absorb pulse variations without influencing the rest of the defect map. When visualizing the result, these regions are masked out (set to zero), since they mostly reflect pulse corrections rather than physical defects.
 
 The optimal regularization parameter $\lambda$ in this paper is chosen with no particular method. In the examples of this paper, we are presenting the solution using the optimal parameters as is without discussing it. More formal methods of finding the optimal $\lambda$ are explored in \cite{Regularization_lambda_parameter_finding}, and the exploration of the effects of different parameter choices for the presented method are documented in \cite{WueestMScThesis}.
 
-More advanced avenues of implementing the Tikhonov regularization are explored\cite{Tikhonov_matrix}. 
+\section{Results}
+ We first present successful defect localization using the experimental setup described in Section \ref{Sec:Exp}. This is followed by an evaluation of the methods capabilities in locating different types of defects utilizing numerical data. 
 
+\subsection{Results - Experimental Validation}\label{Results}
 
+% Figure~\ref{fig:Results_normal} shows the reconstructed defect vector $\vec{\mathbf{d}}$, where each pixel represents the absolute value at a spatial grid point, i.e., LDV measurement location. After solving equation~\ref{full_system}, the resulting vector assigns a reflection amplitude to every grid point. In this case, the vector has $101\times104 = 10,816$ entries, one per grid point. For visualization, each grid point is mapped back onto the 2D plane according to its original arrangement. The heatmap displays the absolute value at each location, which can be interpreted as the amplitude with which the incoming wave is reflected. No phase information is preserved, as the vector is complex-valued. The algorithm does not know the spatial correspondence of each index, and the system is not restricted to a 2D plane.
 
-\section{Results}\label{Results - Experimental Validation}
+% The defect in Figure~\ref{fig:Results_normal} is clearly localized near the target location (yellow square). Small black regions appear around each transducer (red diamonds). These exclusion zones correspond to the unpenalized region in the regularization (Section~\ref{Regularized inversion}) and are masked in the visualization. Behind this mask, the heatmap would show very high values, but these mostly reflect systematic errors in the experiment setup, such as differences in pulse amplitude between calibration and monitoring.
 
-Figure~\ref{fig:Results_normal} shows the reconstructed defect vector $\vec{\mathbf{d}}$, where each pixel represents the absolute value at a spatial grid point. After solving equation~\ref{full_system}, the resulting vector assigns a reflection amplitude to every grid point. In this case, the vector has $101\times104 = 10,816$ entries, one per grid point. For visualization, each grid point is mapped back onto the 2D plane according to its original arrangement. The heatmap displays the absolute value at each location, which can be interpreted as the amplitude with which the incoming wave is reflected. No phase information is preserved, as the vector is complex-valued. The algorithm does not know the spatial correspondence of each index, and the system is not restricted to a 2D plane.
+% The result demonstrates successful localization of the $1\times1\times1\,\mathrm{cm}^3$ iron cube using only sparse measurements at the five transducer locations. The particle velocity data was bandpass filtered to 1--50 kHz and processed via the Tikhonov-regularized inversion described in Section~\ref{Regularized inversion}.
 
-The defect in Figure~\ref{fig:Results_normal} is clearly localized near the target location (yellow square). Small black regions appear around each transducer (red diamonds). These exclusion zones correspond to the unpenalized region in the regularization (Section~\ref{Regularized inversion}) and are masked in the visualization. Behind this mask, the heatmap would show very high values, but these mostly reflect systematic errors in the experiment setup, such as differences in pulse amplitude between calibration and monitoring.
+% Figure~\ref{fig:Results_side} provides cross-sectional views along the x-axis. Slices exceeding 0.6 times the maximum amplitude are retained, and their envelope is drawn. This threshold identifies the localization width: the defect signature has a half-width of approximately 2 cm.
 
-The result demonstrates successful localization of the $1\times1\times1\,\mathrm{cm}^3$ iron cube using only sparse measurements at the five transducer locations. The particle velocity data was bandpass filtered to 1--50 kHz and processed via the Tikhonov-regularized inversion described in Section~\ref{Regularized inversion}.
+% A 15kHz evaluation can be seen in Appendix \ref{Appendix_50khz_pulse}.
 
-Figure~\ref{fig:Results_side} provides cross-sectional views along the x-axis. Slices exceeding 0.6 times the maximum amplitude are retained, and their envelope is drawn. This threshold identifies the localization width: the defect signature has a half-width of approximately 2 cm.
+Figure~\ref{fig:Results_normal} shows the reconstructed defect vector $\vec{\mathbf{d}}$, in which each pixel represents the absolute value at a spatial grid point corresponding to an LDV measurement location. Solving equation~\ref{full_system} assigns a reflection amplitude to each grid point, resulting in a vector containing $104\times104 = 10{,}816$ entries. For visualization, these entries are mapped back onto the two-dimensional plane according to their original spatial arrangement. The heatmap therefore represents the magnitude of the reconstructed scattering response at each location and may be interpreted as a relative reflection amplitude within the assumptions of the linear forward model. Although the reconstructed vector is complex-valued, only its magnitude is displayed for clarity. The inversion itself operates in index space and does not explicitly rely on spatial ordering.
+%; spatial structure is introduced only during visualization, and the formulation is not inherently restricted to two-dimensional geometries.
+
+The defect in Figure~\ref{fig:Results_normal} is clearly localized near the target location (yellow square). Small black regions surrounding each transducer (red diamonds) correspond to exclusion zones defined by the unpenalized region in the regularization (Section~\ref{Regularized inversion}) and are masked in the visualization. Without masking, these regions would exhibit high amplitudes primarily caused by systematic experimental effects, such as differences in pulse amplitude between calibration and monitoring measurements. Consequently, these areas are excluded, as they do not represent physically meaningful scattering locations but arise from source–receiver coupling and experimental bias.
+
+The results demonstrate successful localization of the $1\times1\times1,\mathrm{cm}^3$ iron cube using sparse measurements from only five transducer locations. Here, localization refers to accurate recovery of the defect position, whereas the spatial extent of the reconstructed signature remains limited by the available bandwidth and measurement aperture. The particle-velocity data were bandpass filtered between 1 and 50 kHz and processed using the Tikhonov-regularized inversion described in Section~\ref{Regularized inversion}.
+
+%Figure~\ref{fig:Results_side} presents cross-sectional views along the x-axis. Regions exceeding 0.6 times the maximum amplitude are retained, and their envelope is plotted to estimate the localization width. The threshold was chosen empirically to balance noise suppression and preservation of spatial extent. The reconstructed defect signature exhibits an approximate half-width of 2 cm.
+
+Figure~\ref{fig:Results_side} provides cross-sectional views along the x-axis. Slices exceeding 0.6 times the maximum amplitude are retained, and their envelope is plotted to estimate the localization width. This threshold identifies the localization width: the defect signature has a half-width of approximately 2 cm.
+
+A 15 kHz evaluation is provided in Appendix~\ref{Appendix_50khz_pulse}.
 
 \begin{figure}
   \begin{subfigure}{0.48\linewidth}
@@ -368,19 +383,19 @@ Figure~\ref{fig:Results_side} provides cross-sectional views along the x-axis. S
 \end{figure}
 
 
-\section{Results - Simulations}\label{Appendix_Simulation_Results}\label{Simulation_Results}
-The method was validated using commercial finite-element simulations of a 9 mm thick rectangular aluminum plate, with defects modeled as localized reductions in density.
+\subsection{Results - Simulations}\label{Appendix_Simulation_Results}\label{Simulation_Results}
+The method was validated using the spectral element modelling suite Salvus \cite{mondaic}. We simulated elastic wave propagation on a 50 x 50 cm large and 9 mm thick rectangular aluminum plate, with defects modeled as localized reductions in density.
 
-\textbf{Case A}: Figure \ref{fig:Defect_A} shows a tapered circular lower-density inclusion of 1.5 cm diameter with relative density 0.2, demonstrating accurate localization in a controlled setting. The repetition period is 2 ms, with 5 sensors in a similar configuration, 20\% Gaussian RMS noise, and a 0--50 kHz low-pass filter matching the real-world example. A 50 kHz Ricker wavelet is used as the driving pulse instead of 80 kHz, which should not significantly change the results.
+\textbf{Case A}: Figure \ref{fig:Defect_A} shows a tapered circular lower-density inclusion of 1.5 cm diameter with relative density 20\%. As the simplest case, it serves as a reference for comparison with the other results. The repetition period is 2 ms, with 5 sensors in a similar configuration, 20\% Gaussian RMS noise, and a 0--50 kHz low-pass filter matching the real-world example. A 50 kHz Ricker wavelet is used as the driving pulse instead of 80 kHz, which should not significantly change the results.
 
 \textbf{Case A5B\_1}: Figure \ref{fig:Defect_A5B} contains two tapered inclusions of 1.5 cm and 5 cm diameter at relative density 0.2, using the same parameters as before. It showcases the ability of the method to discern multiple defects simultaneously and larger shapes, despite internally assuming single scattering. The reconstruction, however, shows degradation in the form of significant background artifacts, which appear when the scenario departs from cases well described by single scattering.
 
-\textbf{Case A5B\_2}: In Figure \ref{fig:Simulation_A5B_100khz_results}, the same defect as in \ref{fig:Defect_A5B} is simulated with a 5 ms period and 0--100 kHz frequency range. The algorithm therefore has access to five times more temporal information than in the previous cases. We observe a marked increase in defect reconstruction fidelity and a decrease in background artifacts. Although the parameters are not isolated, comparing the reconstruction of the small defect with that of Figure \ref{fig:Defect_A} shows increased localization accuracy resulting from the higher available frequencies. The longer period, and thus additional information, appears to help in compensating multiple scattering effects and reducing background artifacts. This interpretation is supported by many additional simulations with varied parameters discussed in \cite{WueestMScThesis}.
+\textbf{Case A5B\_2}: In Figure \ref{fig:Simulation_A5B_100khz_results}, the same defect as in \ref{fig:Defect_A5B} is simulated with a 5 ms period and 0--100 kHz frequency range. The algorithm therefore has access to five times more temporal information (2 $\times$ higher frequency, 2.5 $\times$ longer period) than in the previous cases. We observe a marked increase in defect reconstruction fidelity and a decrease in background artifacts.  This case illustrates that when more temporal bandwidth and a longer listening window are available, the method can produce sharper images with less background, while a systematic analysis of these effects is deferred to \cite{WueestMScThesis}.
 
 \textbf{Case ECHO}: Figure \ref{fig:ECHO} provides a proof of concept that the method can operate using only one sensor. In this case, a single transducer is active as emitter and simultaneously acts as the only sensor, essentially a pulse-echo configuration. The data are bandpass filtered to 0--100 kHz with a 5 ms period and 10\% RMS noise. All other parameters are the same as in the other simulation cases. The reconstructed defect closely resembles the small defect of Figure \ref{fig:Simulation_A5B_100khz_results}, rather than \ref{fig:Simulation_A_results}, indicating that localization accuracy is primarily determined by data frequency rather than the number of sensors and thus the amount of data. However, more complex defects such as \ref{fig:Simulation_A5B_Defect} (not shown here) are evaluated much worse in this echo configuration. It is more susceptible to noise and works significantly worse at lower frequencies. These findings align with the description of a similar problem in \cite{Touchscreen}, where increased sensor counts decrease "contrast" (called "background artifacts" here) but do not increase resolution as higher frequencies do. The problem statement is very similar to that of \cite{ebrahimkhanlou_acoustic_2017,One_Channel_reversal}, providing a close comparison to different approaches. Evaluation attempts using real world data did not yield interpretable results, which is in line with the simulations performing poorly as well with the same parameters, as the low frequency and period length offers very little information.
  
 \paragraph{}
-Further details and additional simulation examples are documented in \cite{WueestMScThesis}.
+Further details and additional simulation examples are documented in Appendix \cite{WueestMScThesis}.
 
 \begin{figure}
   \begin{subfigure}{0.48\linewidth}
@@ -448,17 +463,9 @@ Although not explicitly explored in this paper, previous simulation work documen
 
 
 \section{Conclusion}\label{Conclusion}
+This paper presented and experimentally validated an empirical, fully vectorized linear‑operator framework for inverse scattering and structural health monitoring. Using bonded, very cheap piezoelectric transducers and a one‑time LDV calibration scan, we constructed source–receiver impulse‑response operators on a discrete periodic time axis, modeled propagation as circular convolution diagonalized by the DFT, and posed defect localization as a Tikhonov‑regularized linear inverse problem. On an anisotropic CFRP plate, an adhered $1\,\mathrm{cm}^3$ iron cube was localized from sparse measurements at the transducer locations with sub‑wavelength resolution of about $2\,\mathrm{cm}$ at a minimum wavelength of about $8\,\mathrm{cm}$. Complementary simulations on an aluminum plate showed accurate localization of small inclusions, the ability to distinguish multiple defects, defect shapes, as well as a proof‑of‑concept operation in a single‑sensor echo configuration.
 
-This paper presented and experimentally validated an empirical, fully vectorized linear-operator framework for inverse scattering and structural health monitoring. Using bonded piezoelectric transducers and a one-time LDV calibration scan, we constructed source–receiver impulse-response operators on a discrete periodic time axis, represented propagation as circular convolution diagonalized by the DFT, and posed defect localization as a Tikhonov-regularized linear inverse problem. On an anisotropic CFRP plate, an adhered $1\,\mathrm{cm}^3$ iron cube was localized from sparse measurements at the transducer locations with sub-wavelength resolution ($\approx $2cm localization accuracy at a minimum wavelength of 8cm), concentrating computation in the one-time calibration while keeping subsequent monitoring lightweight.
-
-The framework is general and modular: it does not rely on a detailed forward model and can, in principle, be extended to other defect bases, sensing layouts, and wave-bearing media, provided approximate linearity and time invariance. Current limitations, such as the single-scattering assumption, a simple defect basis, and reliance on LDV for calibration point to natural future work toward more complex scattering regimes and fully transducer-based implementations.
-
-While the method presented here is intended as a practical route toward cost‑effective, frequent SHM, the broader point concerns how we choose to describe and interpret a physical system. Rather than insisting on a fully resolved forward model of every underlying quantity, we focus on the relationships between measured signals and let those relationships carry most of the modeling burden. We deliberately reshape the description: although physical time is not periodic, we can design an experiment that behaves as if it were, and then exploit the computational and experimental advantages this offers. In this description, many details that are usually modeled separately—transducer coupling, attenuation, and the interplay of multiple wave modes—are absorbed into the empirical operators by construction, or can be handled with minor adjustments. This perspective can extend beyond the linear‑operator framework used here. In SHM and NDT, periodic time can often be enforced experimentally, and the abstract treatment of measured quantities aligns naturally with recently popular machine‑learning approaches. Combining such experimental designs with data‑driven models may provide a general route to robust, low‑maintenance monitoring or detection systems in different fields.
-
-\paragraph{}
-Working effectively in the 1--50 kHz band validates the empirical-operator concept, even with practical imperfections such as pulse-shape drift and measurement misalignment. The robustness in this band supports our initial hypothesis: circumventing detailed forward models in favor of empirical operators leads to numerically robust properties in the detection algorithm, allowing imperfections to be absorbed into the interpretation of the measured quantities themselves. By removing explicit spatial information entirely (the algorithm does not know about the spatial relations between each grid point), it naturally removes restrictions caused by the frequency-to-pulse-width relation, allowing us to work at low frequencies, which in turn leads to numerical robustness.
-
-
+The framework is general and modular, since it does not rely on a detailed forward model and can in principle be directly applied to other defect models, sensing layouts, and wave‑bearing media as long as linearity and time invariance are given. Working effectively low frequency in the 1–50 kHz band, despite pulse‑shape drift and LDV misalignment, supports the central hypothesis that empirical operators can absorb many experimental imperfections while retaining sub-wavelength localization. At the same time, limitations remain, including the single‑scattering assumption, the simple delta‑like defect basis, and reliance on LDV for calibration. These point to natural future work toward richer scattering models, fully transducer‑based implementations, and practical SHM systems in which the one‑time calibration enables fast, low‑cost monitoring, possibly including touch‑like sensing applications.
 
 \appendix
 \section{Appendix}\label{My Appendix}
@@ -467,6 +474,12 @@ Working effectively in the 1--50 kHz band validates the empirical-operator conce
 In both simulation and real world experiments, only the out of plane components have been used. The real world setup used an LDV capable of also recording velocities in all three space directions. The method should in theory be able to use any of the three dimensions, or their sum as the measured quantities. This was not explored during the Simulation work, and in the real world experiment, these components showed high noise ratios, as well as many "dead" grid points without measurements for unknown systematic reasons, yielding non interpretable results. As such, we could not verify that this method extends to longitudinal wave components. 
 
 Exploration of this property could be practical in the case of pursuit of a practical SHM implementation. If the hypothesis holds that the sum of all three velocity components is a valid quantity for this method, in the case of curved surfaces, would remove the need to compute the out-of-plane component at various directions. The result would be a simplified implementation where the three-component velocity at every grid point could be fed directly from the LDV into the algorithm without accounting for the orientation of the surface at any given point. Further reading: \cite{WueestMScThesis}.
+
+
+\subsection{Computational performance}\label{Appendix_Computation}
+In the implementation used in this paper, the global system matrix $\mathcal{L}_{\text{full}}$ from equation~\ref{full_system} is formed explicitly and inverted in a Tikhonov sense via $(\mathcal{L}^T \mathcal{L} + \lambda \Gamma)^{-1} \mathcal{L}^T$. For a matrix of size $n\times m$ with measurements $n$ and defect parameters $m$ (equals grid size in our case), memory scales as $\mathcal{O}(nm)$ and the inversion cost as $\mathcal{O}(n m^2)$. Adding measurements is therefore comparatively cheap, whereas enlarging the defect space is the dominant computational bottleneck.
+On a standard laptop with 16\,GB RAM (about 9\,GB effectively usable) and an Intel Gen13 i7 CPU, practical limits are matrices of order $10^4\times10^4$ in Float32, with additional overhead from temporary work arrays. For the experimental CFRP case studied here ($\approx10^4$ defect parameters and $\approx10^3$ measurements), the one-time inversion of $\mathcal{L}_{\text{full}}$ takes about $17$\,s. The empirical impulse responses (Section~\ref{Empirical impulse responses}) are obtained in roughly 4\,s and scale linearly in grid size and measurement points, so they remain inexpensive compared to the inversion as the scale increases. The subsequent evaluations for new measurement vectors reduce to a single matrix--vector multiplication and take around 3--5\,ms in the presented case. From a computational perspective, this separation between a moderately expensive calibration step and very fast evaluation makes the method potentially viable as a low-cost, touchscreen application as in \cite{Touchscreen}. The evaluation does not have any memory requirements, potentially allowing frequent automated SHM on a simple system.
+
 
 \subsection{Low Frequency data}\label{Appendix_50khz_pulse}
 
@@ -489,12 +502,28 @@ The results presented in the main paper employ a 1--50 kHz bandpass filter, whic
   \caption{Effect of 1--50 kHz bandpass filtering on the transducer pulse shape in the periodic time framework.}
   \label{fig:50khz}
 \end{figure}
+\paragraph{}
+Pushing the low‑frequency properties to the limit, we explore the 1--15 kHz band, which is the lowest range available in the experimental setup. From Figure~\ref{fig:Dispersion:b}, the corresponding minimum wavelength is on the order of 16 cm, comparable to the plate dimensions. The result therefore serves as a proof of concept for operation at much lower frequencies and provides an additional argument for sub‑wavelength localization capability. Below this range the method no longer yields discernible defect signatures, which may be caused by the wavelength approaching the plate size. Improved performance at such low frequencies would require more information, either by extending the repetition period (if low attenuation permits) or by increasing the number of sensors.
 
-\subsection{Computational performance}\label{Appendix_Computation}
-In the implementation used in this paper, the global system matrix $\mathcal{L}_{\text{full}}$ from equation~\ref{full_system} is formed explicitly and inverted in a Tikhonov sense via $(\mathcal{L}^T \mathcal{L} + \lambda \Gamma)^{-1} \mathcal{L}^T$. For a matrix of size $n\times m$ with measurements $n$ and defect parameters $m$ (equals grid size in our case), memory scales as $\mathcal{O}(nm)$ and the inversion cost as $\mathcal{O}(n m^2)$. Adding measurements is therefore comparatively cheap, whereas enlarging the defect space is the dominant computational bottleneck.
-On a standard laptop with 16\,GB RAM (about 9\,GB effectively usable) and an Intel Gen13 i7 CPU, practical limits are matrices of order $10^4\times3\times10^4$ in Float32 (\(\sim\)1.2\,GB for the main matrix), with additional overhead from temporary work arrays. For the experimental CFRP case studied here ($\approx10^4$ defect parameters and $\approx10^3$ measurements), the one-time inversion of $\mathcal{L}_{\text{full}}$ takes about $17$\,s. The empirical impulse responses (Section~\ref{Empirical impulse responses}) are obtained in roughly 4\,s and scale linearly in grid size and measurement points, so they remain inexpensive compared to the inversion as the scale increases. The subsequent evaluations for new measurement vectors reduce to a single matrix--vector multiplication and take around 3--5\,ms in the presented case. From a computational perspective, this separation between a moderately expensive calibration step and very fast evaluation makes the method potentially viable as a low-cost, touchscreen application as in \cite{Touchscreen}. The evaluation does not have any memory requirements, potentially allowing frequent automated SHM on a simple system.
+The result in Figure~\ref{fig:15khz} shows a clear but less clean localization of the defect, with substantial background artifacts and isolated grid points that reach very high amplitudes, particularly on the left side. The origin of these isolated peaks is unclear. They may be related to grid points with poor or missing measurements, which are present at all frequencies but appear most prominently in this low‑frequency setting.
 
-
+\begin{figure}
+  \begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Results/15khz.png}
+    \caption{CFRP plate defect reconstruction using a 1--15 kHz bandpass filter. In this range the waves lie fully within the human audible band.}
+    \label{fig:result_15khz}
+  \end{subfigure}\hfill
+  \centering
+  \begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Results/15khzsection_scan_L_10.0_x.png}
+    \caption{Cross-sectional profiles along the x-axis through the reconstructed defect. Colored envelopes show slices with amplitude exceeding 0.5 times the maximum. Some narrow noise peaks are hidden by the legend.}
+    \label{fig:sideways_15khz}
+  \end{subfigure}
+  \caption{Defect localization in the very low 1--15 kHz band. The defect remains identifiable, but background artifacts and isolated high-amplitude pixels are more pronounced than at higher frequencies.}
+  \label{fig:15khz}
+\end{figure}
 
 
 \subsection{Frequency content and dispersion}\label{Appendix_Dispersion_Curve}\label{Appendix_Frequencies}
@@ -531,7 +560,8 @@ Therefore, restricting the frequency band may be advantageous: Although fewer da
 
 
 \subsection{Generalization to arbitrary defect bases}\label{Generalization to arbitrary defect bases}
-As mentioned in Section \ref{Defect model} and applied in Section \ref{Operator assembly}, we assumed the defect to act as a perfect reflector of form $\vec{e}_0$. In general this assumption does not hold for more complicated defects, such as delaminations in fiber-reinforced materials. In this case, using a simulation with a defect at a known location, one can compute the response nature through similar means to those described in Sections \ref{Operator assembly} and \ref{Regularized inversion}.
+The results shown in this paper use the simple delta basis. However, we can generalize the approach to have an arbitrary basis vectors, and multiple of those available at each grid location.
+
 Assuming we have obtained empirical defect vectors for two defect types of interest, $\vec{b}_1$ and $\vec{b}_2$, we can implement these two vectors as a basis using a projector matrix $P$:
 \begin{equation}
   P := \begin{bmatrix}
@@ -549,13 +579,15 @@ as well as an adjustment to the full defect vector $\mathbf{d}$ to hold two para
 \end{equation}
 where for $d_{k,b}$, $k$ denotes the grid location, and $b$ the basis vector at that location.
 
-This approach is not used in this paper, as we continue using a delta-like simplifies defect. Experiments in simulation work so far has not yielded many useful bases that significantly increased performance. Especially considering the computational costs associated with increasing the defect space, as well as since we are already working in highly underdetermined systems in this paper. See \cite{WueestMScThesis} for further discussions into different defect bases.
+This approach is not used in this paper, as we continue using a delta-like simplifies defect. Experiments in simulation work so far has not yielded many useful bases that significantly increased performance.  However, this generalized approach is likely needed to increase the performance in detecting delaminations in CFRP, which seem to not act very delta-like, by empirically measuring the defect response of a delaminated spot \cite{WueestMScThesis}.
+
+
 
 \subsection{Sensor Configurations}\label{Appendix_sensor_configs}
 The sensor configuration used in this paper as described in section \ref{Operator assembly} are chosen as s [[1,2], [1,3], [1,4],
 [1,5], [2,3], [2,4], [2,5], [3,4], [3,5], [4,5] ]. For the echo configuration in Figure \ref{fig:ECHO}, it is [[1,1]]. The choice of the 5-sensor system is motivated by avoiding symmetric sets to be included, such as [[1,2],[2,1]], as due to the reciprocity assumption, do not provide additional significant useful information. Testing confirmed this to be the case.  
 \paragraph{}
-In hindsight, it would likely be better to use a basis layout such as [[1,2],[1,3],[2,3],[2,4],[3,4],...] to treat all emitters equally importantly. This was  thought of too late, but testing afterwards revealed no noticeable improvements when using such a configuration. Therefore, the results were kept.
+In hindsight, it would likely be better to use a basis layout such as [[1,2],[1,3],[2,3],[2,4],[3,4],...] to treat all emitters equally importantly. This was  thought of too late, but testing afterwards revealed no noticeable improvements. Therefore, the results were kept.
 \paragraph{}
 The inclusion of a full set of measurements including self-measurements such as ([1,1],[2,2] etc.) should in theory improve the results, but testing shows a tendency to decrease the result quality, which is odd, given the single pulse cases \ref{fig:ECHO} do work, therefore the information should not be useless. 
 
