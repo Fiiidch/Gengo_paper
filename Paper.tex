@@ -93,7 +93,9 @@
 \begin{abstract}
 We present an empirically calibrated, fully vectorized linear-operator framework for inverse scattering, motivated by challenges in non-destructive testing (NDT) and structural health monitoring (SHM) where reliable forward models are difficult to obtain and maintain. The method enables defect localization without requiring an explicit physical model of wave propagation. Source–receiver impulse-response operators are constructed through a one-time calibration using bonded piezoelectric transducers for excitation and dense Laser Doppler Vibrometer (LDV) measurements. Enforcing discrete periodic time behavior represents propagation as circular convolution, yielding circulant operators diagonalizable via the discrete Fourier transform (DFT) and allowing defect localization to be posed as a Tikhonov-regularized linear inverse problem using only sparse monitoring data.
 
-Experimental validation on a bidirectional carbon-fiber-reinforced polymer (CFRP) plate demonstrates sub-wavelength localization of a 1 cm³ adhered defect using measurements acquired solely at transducer locations after calibration. Computational cost is concentrated in the calibration stage, while subsequent evaluations reduce to rapid matrix–vector operations. Complementary simulations support the experimental results and illustrate performance across varying defect scenarios and sensing configurations.
+Experimental validation on a bidirectional carbon-fiber-reinforced polymer (CFRP) plate demonstrates sub-wavelength localization of a 1 cm³ adhered defect using measurements acquired solely at transducer locations after calibration. Computational cost is concentrated in the calibration stage, while subsequent evaluations reduce to rapid matrix–vector operations. Additional simulations complement the experimental results and probe performance across defect scenarios and sensing configurations, including proof-of-concept localization in a single-transducer (pulse-echo) setting.
+
+%Experimental validation on a bidirectional carbon-fiber-reinforced polymer (CFRP) plate demonstrates sub-wavelength localization of a 1 cm³ adhered defect using measurements acquired solely at transducer locations after calibration. Computational cost is concentrated in the calibration stage, while subsequent evaluations reduce to rapid matrix–vector operations. Complementary simulations support the experimental results and illustrate performance across varying defect scenarios and sensing configurations.
 
 Relying only on linear time-invariant system assumptions, the framework provides a data-driven alternative for NDT and SHM in situations where maintaining accurate digital twins is impractical, and may extend to other wave-based sensing applications.
 \end{abstract}
@@ -117,20 +119,18 @@ Relying only on linear time-invariant system assumptions, the framework provides
 \end{highlights}
 
 \begin{keywords}
-Inverse scattering \sep Ultrasonic NDT \sep Data driven modeling\sep Defect localization \sep Empirical impulse response \sep Tikhonov regularization \sep Structural health monitoring
+Inverse scattering \sep Ultrasonic guided waves \sep Laser Doppler vibrometry (LDV) \sep Empirical impulse response \sep Circular convolution \sep Tikhonov regularization \sep Structural health monitoring
 \end{keywords}
 
 
 \maketitle
 
 \section{Introduction}\label{Introduction}
-% Structural Health Monitoring (SHM) of engineered components aims to localize and characterize defects. The importance of SHM depends on the cost of failure, which is especially relevant in aviation, hence many methods of performing SHM on flat structures have been explored and documented\cite{Aviation_Book}. Among these methods, Piezoelectric sensors are promising from a commercial point of view due to their low cost. However, increased challenges are noted when monitoring Carbon-fiber-reinforced polymer (CFRP) components \cite{Aircraft_NDT}. Different methods for CFRP SHM are explored specifically in \cite{Current_Methods}\cite{Composite_pipe_ndt}.
 
-% Sparse monitoring using Piezoelectric sensors (measuring at a few strategically placed sensors) of lamb waves \cite{Lamb_wave_transducer} would therefore be especially desirable, but it typically requires detailed numerical forward models that are difficult to build and maintain in composites \cite{Modelling_Challenges}\cite{OG_Lamb_wave}. CFRP plates, in particular, exhibit variability from layup and manufacturing that undermines predictive digital twins \cite{Manufacturing_Variability_Problems}\cite{CFRP_Defects} . The use of Laser Doppler Vibrometers (LDV) in data-driven approaches for composite structures has gained increasing attention as a means of circumventing these challenges \cite{LDV_SHM_CFRP}. 
 
-Structural Health Monitoring (SHM) of engineered components seeks to localize and characterize defects before they compromise structural integrity. The relevance of SHM is closely linked to the cost of failure, which is particularly critical in aviation, and has motivated extensive research on monitoring approaches for relatively simple, flat structures \cite{Aviation_Book}. Among the available techniques, piezoelectric transducers are attractive from a commercial perspective because of their low cost and ease of integration. Nevertheless, significant difficulties arise when these concepts are transferred to carbon-fiber reinforced polymers (CFRPs) \cite{Aircraft_NDT}, and a range of dedicated strategies for CFRP inspection have therefore been investigated \cite{Current_Methods,Composite_pipe_ndt}. Interpreting guided-wave measurements in such materials is inherently complex: overlapping modes often demand dedicated processin—such as ridge-based time–frequency analysis, beamforming, or migration—to extract meaningful arrivals \cite{Raghavan2007}, while benign geometric features, multiple reflections, and mode conversions at joints and thickness transitions generate coherent clutter that can obscure damage signatures \cite{Cawley2002,Olisa2021}. These effects are amplified by the pronounced anisotropy, laminate heterogeneity, and viscoelastic damping of CFRPs, which lead to direction- and frequency-dependent dispersion and attenuation \cite{Calomfirescu2008,Ostachowicz2024}. Curvature, stiffeners, and adhesive interfaces introduce additional localized scattering, and in large curved assets such as rocket fuselages or wind-turbine blades, spatially varying thickness and fiber orientation challenge travel-time–based concepts \cite{Yu2025,Chia2023,Jankauskas2011,Mustapha2024,Park2017}.
+Structural Health Monitoring (SHM) of engineered components seeks to localize and characterize defects before they compromise structural integrity. The relevance of SHM is closely linked to the cost of failure, which is particularly critical in aviation, and has motivated extensive research on monitoring approaches for relatively simple, flat structures \cite{Aviation_Book}. Among the available techniques, piezoelectric transducers are attractive from a commercial perspective because of their low cost and ease of integration. Nevertheless, significant difficulties arise when these concepts are transferred to carbon-fiber reinforced polymers (CFRPs) \cite{Aircraft_NDT}, and a range of dedicated strategies for CFRP inspection have therefore been investigated \cite{Current_Methods,Composite_pipe_ndt}. Interpreting guided-wave measurements in such materials is inherently complex: overlapping modes often demand dedicated processing, such as ridge-based time–frequency analysis, beamforming, or migration to extract meaningful arrivals \cite{Raghavan2007}, while benign geometric features, multiple reflections, and mode conversions at joints and thickness transitions generate coherent clutter that can obscure damage signatures \cite{Cawley2002,Olisa2021}. These effects are amplified by the pronounced anisotropy, laminate heterogeneity, and viscoelastic damping of CFRPs, which lead to direction- and frequency-dependent dispersion and attenuation \cite{Calomfirescu2008,Ostachowicz2024}. Curvature, stiffeners, and adhesive interfaces introduce additional localized scattering, and in large curved assets such as rocket fuselages or wind-turbine blades, spatially varying thickness and fiber orientation challenge travel-time–based concepts \cite{Yu2025,Chia2023,Jankauskas2011,Mustapha2024,Park2017}.
 
-Sparse monitoring of Lamb waves using a limited number of piezoelectric sensors \cite{Lamb_wave_transducer} would therefore be highly attractive. However, such approaches generally rely on detailed numerical forward models. Modern numerical frameworks—including finite- and spectral-element solvers combined with higher-order plate formulations have proven capable of reproducing dispersion, mode conversion, and multi-path scattering in anisotropic laminates with high fidelity while remaining computationally efficient at ultrasonic frequencies \cite{Calomfirescu2008,Kudela2024}. Nevertheless, such models are difficult to maintain for composite structures \cite{Modelling_Challenges,OG_Lamb_wave}. CFRP components, in particular, exhibit variability arising from lay-up and manufacturing processes that undermines the reliability of predictive digital twins \cite{Manufacturing_Variability_Problems,CFRP_Defects}. In response to these limitations, data-driven strategies based on Laser Doppler Vibrometry (LDV) have gained increasing attention as a means to capture rich wavefield information directly from the structure and to reduce dependence on uncertain a priori models \cite{LDV_SHM_CFRP, Thomsen2024}.
+Sparse monitoring of Lamb waves using a limited number of piezoelectric sensors \cite{Lamb_wave_transducer} would therefore be highly attractive. However, such approaches generally rely on detailed numerical forward models. Modern numerical frameworks, including finite- and spectral-element solvers combined with higher-order plate formulations have proven capable of reproducing dispersion, mode conversion, and multi-path scattering in anisotropic laminates with high fidelity while remaining computationally efficient at ultrasonic frequencies \cite{Calomfirescu2008,Kudela2024}. Nevertheless, such models are difficult to maintain for composite structures \cite{Modelling_Challenges,OG_Lamb_wave}. CFRP components, in particular, exhibit variability arising from lay-up and manufacturing processes that undermines the reliability of predictive digital twins \cite{Manufacturing_Variability_Problems,CFRP_Defects}. In response to these limitations, data-driven strategies based on Laser Doppler Vibrometry (LDV) have gained increasing attention as a means to capture rich wavefield information directly from the structure and to reduce dependence on uncertain a priori models \cite{LDV_SHM_CFRP, Thomsen2024}.
 
 This paper validates a novel method based on empirical linear operators\cite{Matrix_use_in_ndt}\cite{Touchscreen} and a fundamentally periodic time formulation. The result is a matrix based description of the system and it's inversion to solve for defects \cite{inversion_method_1}. We excite the structure with bonded piezoelectric transducers and use an LDV to perform a dense, one-time calibration LDV scan that constructs source–receiver impulse-response operators. Wave propagation is treated on a discrete cyclic time axis so that it acts as circular convolution, diagonalized by the discrete Fourier transform (DFT). 
 By designing the excitation to be strictly periodic and ensuring no other sources act on the object, the cyclic time embedding is valid by construction. We impose time periodic behavior in the setup, and thus the frequency treatment becomes equivalent to the time domain treatment.
@@ -149,7 +149,7 @@ Before presenting the experimental results, we first introduce the mathematical 
 \subsection{System assumptions}\label{System assumptions}
 We assume: (i) linearity; (ii) time invariance; (iii) reciprocity; (iv) practical flatness (LDV access); and (v) the ability to control the excitation of the material relative to noise.
 
-Assumptions (i), (ii), and (iii) are naturally satisfied for mechanical waves under standard conditions. Assumption (iv) refers to geometries where the object thickness is small relative to its lateral dimensions, typically valid for plate-like components such as aircraft fuselage panels and shell structures. Assumption (v) simply requires a controlled excitation capability, which is standard in active NDT configurations using piezoelectric or electromagnetic transducers.
+Assumptions (i), (ii), and (iii) are naturally satisfied for mechanical waves under standard conditions. Assumption (iv) refers to geometries where the object thickness is small relative to its lateral dimensions, typically valid for plate-like components such as aircraft fuselage panels and shell structures. Assumption (v) simply requires a controlled excitation capability, which is standard in active NDT/SHM configurations using piezoelectric or electromagnetic transducers.
 
 \subsection{Terminology and Notation}
 We work with discrete-time vectors and matrices throughout. The spatial domain is discretized into a set of points indexed by integers without implying any particular geometric arrangement. For instance, a 100×100 scan grid of a square plate yields 10,000 points labeled 1 through 10,000, with the specific mapping arbitrary, but fixed.
@@ -209,7 +209,9 @@ For an emitter at position $j$ and a measurement at position $i$, the measured s
 \begin{equation}
 \vec m_i = \vec{g}_{ij}\ast\vec s_j + \sum_{k=1}^N \vec{g}_{ik} \ast \vec{d}_k \ast\vec{g}_{kj}\ast \vec s_j.
 \end{equation}
-Which can be rewritten in matrix form:
+Here, ``single scattering'' means first order in \emph{defect-induced} scattering. Boundary reflections and other multipath propagation of the undamaged plate are already embedded in the empirically measured impulse responses $\vec g_{ij}$; only terms with multiple defect interactions are neglected.
+
+It can be rewritten in matrix form:
 \begin{equation}
 \vec m_i = G_{ij}\vec s_j + \sum_{k=1}^N G_{ik} D_k G_{kj} \vec s_j.
 \end{equation}
@@ -394,6 +396,28 @@ Figure~\ref{fig:Results_side} provides cross-sectional views along the x-axis. S
   \label{fig:Results}
 \end{figure}
 
+\begin{figure}
+  \begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Results/15khz_sub.png}
+    \caption{CFRP plate defect reconstruction using a 1--15 kHz bandpass filter. In this range, the waves lie within the human audible band.}
+    \label{fig:result_15khz_sub
+    }
+  \end{subfigure}\hfill
+  \centering
+  \begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Results/15khz_side.png}
+    \caption{CFRP plate defect reconstruction using a 1--15 kHz bandpass filter.}
+    \label{fig:sideways_15khz}
+  \end{subfigure}
+  \caption{Cross-sectional profiles along the x-axis through the reconstructed defect (left panel). Colored envelopes show slices with
+amplitude exceeding 0.5 times the maximum. The localization
+width is as estimated as the FWHM threshold, at 1.4 cm.}
+  \label{fig:15khz}
+\end{figure}
+
+
 \subsection{Results - Additional Simulations}\label{Additional Simulations}
 To complement the baseline simulation (Case A, Section~\ref{Simulation_Results}) and the experimental validation above, we consider additional simulated cases that probe variants and practical limits of the approach. Unless explained otherwise, the simulation setup is identical to Section~\ref{Simulation_Results}.
 
@@ -464,20 +488,16 @@ This paper presented and experimentally validated an empirical, fully vectorized
 The framework is general and modular: it does not rely on a detailed forward model and can, in principle, be applied to other defect models, sensing layouts, and wave‑bearing media, provided linearity and time invariance hold. Operating in the 1--50 kHz band, and despite pulse‑shape drift and LDV misalignment, the results support the central premise that empirical operators can absorb many experimental imperfections while retaining sub-wavelength localization. At the same time, limitations remain, including the single‑scattering assumption, the simple delta‑like defect basis, and reliance on LDV for calibration. These point to natural future work on richer scattering models and fully transducer‑based implementations, toward practical SHM systems in which the one‑time calibration enables fast, low‑cost monitoring, possibly including touch‑like sensing applications.
 
 \appendix
-\section{Appendix}\label{My Appendix}
+\section{Additional experimental details and preprocessing}\label{app:exp_details}
+This appendix documents measurement-component choices, filtering effects induced by the periodic-time formulation, and approximate dispersion estimation used only for order-of-magnitude wavelength references.
 
 \subsection{Longitudinal Velocity Components}\label{Appendix_V_yxz}
-In both the simulations and the experiments, only the out-of-plane velocity component is used. The experimental setup employed an LDV capable of recording velocity in all three spatial directions. In principle, the method should be compatible with using any single component, or a combination of components (e.g., their sum), as the measured quantity. This option was not evaluated in the simulations. In the experimental data, the in-plane components exhibited low signal-to-noise ratios and many "dead" grid points with missing measurements for unknown systematic reasons, yielding non-interpretable results. Consequently, we could not verify that the method extends to longitudinal (in-plane) velocity components.
+In this work we use only the out-of-plane LDV velocity component $V_z$, which is excited most strongly by the bonded piezoelectric discs and yields the highest signal-to-noise ratio in our dataset. However, the proposed framework is not specific to Lamb-wave mode content or to any particular velocity component: it operates on an empirically calibrated linear time-invariant input--output map, and can in principle be applied to any linear time-independent measured observable (e.g., $V_x$, $V_y$, $V_z$, their sum or transducer voltage).
 
-Exploring this aspect may be relevant for practical SHM implementations. If the hypothesis holds that the sum of all three velocity components is a valid input quantity, then for curved surfaces this could reduce the need to compute an out-of-plane component that varies with local surface orientation. This would enable a simplified workflow in which the three-component velocity at each grid point is provided directly to the algorithm without explicitly accounting for surface orientation. Further reading: \cite{WueestMScThesis}.
-
-
-\subsection{Computational performance}\label{Appendix_Computation}
-In the implementation used in this paper, the global system matrix $\mathcal{L}_{\text{full}}$ from equation~\ref{full_system} is formed explicitly and inverted in a Tikhonov sense via $(\mathcal{L}^T \mathcal{L} + \lambda \Gamma)^{-1} \mathcal{L}^T$. For a matrix of size $n\times m$ with measurements $n$ and defect parameters $m$ (equals grid size in our case), memory scales as $\mathcal{O}(nm)$ and the inversion cost as $\mathcal{O}(n m^2)$. Adding measurements is therefore comparatively cheap, whereas enlarging the defect space is the dominant computational bottleneck.
-On a standard laptop with 16\,GB RAM (about 9\,GB effectively usable) and an Intel Gen13 i7 CPU, practical limits are matrices of order $10^4\times10^4$ in Float32. For the experimental CFRP case studied here ($\approx10^4$ defect parameters and $\approx10^3$ measurements), the one-time inversion of $\mathcal{L}_{\text{full}}$ takes about $17$\,s. The empirical impulse responses (Section~\ref{Empirical impulse responses}) are obtained in roughly 4\,s and scale linearly in grid size and transducer count, so they remain inexpensive compared to the inversion as the scale increases. The subsequent evaluations for new measurement vectors reduce to a single matrix--vector multiplication and take around 3--5\,ms in the presented case. From a computational perspective, this separation between a moderately expensive calibration step and very fast evaluation makes the method potentially viable as a low-cost, touchscreen application as in \cite{Touchscreen}. The evaluation does not have any memory requirements, potentially allowing frequent automated SHM on a simple system.
+We did not evaluate multi-component reconstructions in the simulations. In the experimental data, the in-plane components ($V_x$, $V_y$) exhibited substantially lower SNR and contained many grid points with missing or unreliable measurements, leading to non-interpretable reconstructions. For this reason, we restrict the experimental results in this paper to $V_z$.
 
 
-\subsection{Low Frequency data}\label{Appendix_50khz_pulse}
+\subsection{Effect of 1--50 kHz filtering under periodic time}\label{Appendix_50khz_pulse}
 The results presented in the main paper employ a 1--50 kHz bandpass filter, whereas the calibration snapshot in Figure~\ref{fig:Screenshot} is unfiltered. Figure~\ref{fig:Screenshot_50khz} shows the same acquisition time point after low-pass filtering to 50 kHz. The filtering substantially increases the effective pulse duration, such that the response wraps around within the periodic time window. Accordingly, near the end of the 2 ms period ($t \approx 1.9$ ms), the pulse from the subsequent repetition is already visible (Figure~\ref{fig:Screenshot_50khz_1.9ms}). This observation highlights that the framework does not require short, well-separated pulses; the periodic time treatment is therefore not merely a computational convenience but is intrinsic to the formulation of the inverse problem.
 
 \begin{figure}
@@ -497,37 +517,43 @@ The results presented in the main paper employ a 1--50 kHz bandpass filter, wher
   \caption{Effect of 1--50 kHz bandpass filtering on the transducer pulse shape in the periodic time framework.}
   \label{fig:50khz}
 \end{figure}
-\paragraph{}
-To probe the low-frequency limit, we evaluate the 1--15 kHz band, which is the lowest functional range in the experimental setup. From Figure~\ref{fig:Dispersion:b}, the corresponding minimum wavelength is on the order of 16 cm. This case serves as a proof of concept for operation at substantially lower frequencies and provides an additional indication of sub-wavelength localization capability. Below this range, the method no longer yields discernible defect signatures, which may be caused by the wavelength approaching the plate size. Improved performance at such low frequencies would require additional information, for example by extending the repetition period (if low attenuation permits) or by increasing the number of sensors.
+\subsection{Very-low-frequency evaluation (1--15 kHz and 1--30 kHz)}\label{Appendix_15khz}
+To probe the low-frequency limit, we evaluate the 1--15 kHz and 1--30 kHz bands. From Figure~\ref{fig:Dispersion:b}, the corresponding minimum wavelength of 16 cm and 10 cm respectively. Below the 15 kHz range, the method no longer yields discernible defect signatures, which may be caused by the wavelength approaching the plate size. Improved performance at such low frequencies would require additional information, for example by extending the repetition period (if low attenuation permits) or by increasing the number of sensors.
 
-The result in Figure~\ref{fig:15khz} shows that the defect remains identifiable, but the reconstruction contains substantial background artifacts and isolated grid points that reach very high amplitudes, particularly on the left side. The origin of these isolated peaks is unclear; they may be related to grid points with poor or missing measurements, which are present at all frequencies but appear most prominently in this low-frequency setting.
+
+
 
 \begin{figure}
   \begin{subfigure}{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{Figures/Results/15khz.png}
     \caption{CFRP plate defect reconstruction using a 1--15 kHz bandpass filter. In this range, the waves lie within the human audible band.}
-    \label{fig:result_15khz}
+    \label{fig:result_15khz_bad}
   \end{subfigure}\hfill
   \centering
   \begin{subfigure}{0.48\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{Figures/Results/15khzsection_scan_L_10.0_x.png}
-    \caption{Cross-sectional profiles along the x-axis through the reconstructed defect. Colored envelopes show slices with amplitude exceeding 0.5 times the maximum. Some narrow noise peaks are hidden by the legend.}
+    \includegraphics[width=\linewidth]{Figures/Results/30khz.png}
+    \caption{CFRP plate defect reconstruction using a 1--30 kHz bandpass filter.}
     \label{fig:sideways_15khz}
   \end{subfigure}
-  \caption{Defect localization in the very low 1--15 kHz band. The defect remains identifiable, but background artifacts and isolated high-amplitude pixels are more pronounced than at higher frequencies.}
+  \caption{Defect localization results in the very low 1--15 kHz and 1--30 kHz bands. The defect remains identifiable at 1--15 kHz, but background artifacts and isolated high-amplitude pixels are more pronounced than at higher frequencies.}
   \label{fig:15khz}
 \end{figure}
 
 
-\subsection{Frequency content and dispersion}\label{Appendix_Dispersion_Curve}
+
+
+\subsection{Dispersion estimate and limitations}\label{Appendix_Dispersion_Curve}
 Figures \ref{fig:Dispersion} suggest phase velocities that increase with frequency and reach values on the order of 7 km/s at the upper end of the measured band. A theoretical Lamb-mode estimate\cite{Lamb_wave_Calculator}, using approximate CFRP parameters, places the high-frequency A0 branch near 3.8 km/s. This theoretical calculation is only a rough reference because it assumes isotropic, homogeneous material properties and does not account for the plate's anisotropy or layup; substantial discrepancies are therefore expected. Neither approach alone provides a definitive ``ground truth.'' The mismatch could also reflect a systematic error in the dispersion-processing workflow. The relevant code can be found in \cite{WueestMScThesis}. 
 
 For the purposes of this paper, we use phase-velocity/wavelength estimates only as order-of-magnitude references when assessing whether the observed localization is sub-wavelength. At 50 kHz, the corresponding wavelengths are on the order of a few centimeters, and the observed localization ($\approx$2 cm) remains smaller than both the theoretical estimate of 4cm and the experimental estimate of 8cm. 
 
 
-\subsection{Behavior of experimental data at high frequencies}\label{Appendix_Frequencies}
+\section{Additional diagnostics and limitations}\label{app:diagnostics}
+This appendix collects observations that affect reconstruction quality but are not central to the core method description.
+
+\subsection{High-frequency degradation in the experiment}\label{Appendix_Frequencies}
 In the experimental example of section~\ref{Results Experimental}, including higher-frequency data provides limited incremental benefit, even though the measured wave spectrum extends beyond 50 kHz. This is consistent with the 80 kHz central frequency of the transmitted pulses and is confirmed by measurements at multiple locations on the plate.
 
 Using the 100--150 kHz band alone yields poor results, suggesting that this frequency range does not contribute useful information for defect localization in the current setup. It is also notable that processing 1--50 kHz performs similarly to 1--80 kHz, despite the system matrix in equation~\ref{full_system} having dimensions $1000\times 10816$. The inverse problem is therefore highly underdetermined (by a factor $>10$), so the absence of improvement from additional bandwidth is nontrivial.
@@ -540,15 +566,39 @@ Restricting the frequency band may therefore be advantageous: although fewer dat
 
 
 
+\subsection{Sub-Wavelength localization discussions}\label{Appendix_Sub-wavelentgh}
+The Sub-Wavelength localization has generated a lot of discussion, yet it remains challenging to provide a concise explanation, especially since it is difficult to demonstrate a limitation does \textit{not} occur. Based on the mathematical methodology used which does not rely on explicit spatial information, there appears to be no inherent restriction enforcing a wavelength limit. In contrast, other methods often have such restrictions, typically due to the need to reconstruct measured waves in space. For example, \cite{ebrahimkhanlou_acoustic_2017} describes a method with such a limitation, though it is not explicitly discussed there.
+\paragraph{}
+However, in the simulation study here, a decrease in resolution is observed at lower frequencies, which suggests that the method is not entirely independent of wavelength-related limits. The discussion is complicated by the fact that changing the frequency bandwidth simultaneously affects three factors: the maximum frequency, the amount of information available due to the system matrix shape (see Eq.~\ref{full_system}), and increased susceptibility to standard norm-based regularization, which can smear the result because neighboring points respond more similarly at longer wavelengths. For all intents and purposes, the method does have a resolution limitation as a function of frequency, but it is also dependent on other variables, without a hard cutoff based on frequency alone. Given the proof-of-concept nature of this paper, we refrain from exploring this topic in depth, simply noting that it is possible to isolate each variable to obtain definite answers if desired.
 
 
-\subsection{Piezoelectric Measuring}\label{Appendix_Piezoelectric}
+\section{Implementation details and extensions}\label{app:implementation}
+This appendix summarizes computational scaling, the sensor-pair stacking used, and straightforward extensions of the defect parameterization.
 
+\subsection{Computational performance}\label{Appendix_Computation}
+In the implementation used in this paper, the global system matrix $\mathcal{L}_{\text{full}}$ from equation~\ref{full_system} is formed explicitly and inverted in a Tikhonov sense via $(\mathcal{L}^T \mathcal{L} + \lambda \Gamma)^{-1} \mathcal{L}^T$. For a matrix of size $n\times m$ with measurements $n$ and defect parameters $m$ (equals grid size in our case), memory scales as $\mathcal{O}(nm)$ and the inversion cost as $\mathcal{O}(n m^2)$. Adding measurements is therefore comparatively cheap, whereas enlarging the defect space is the dominant computational bottleneck.
+On a standard laptop with 16\,GB RAM (about 9\,GB effectively usable) and an Intel Gen13 i7 CPU, practical limits are matrices of order $10^4\times10^4$ in Float32. For the experimental CFRP case studied here ($\approx10^4$ defect parameters and $\approx10^3$ measurements), the one-time inversion of $\mathcal{L}_{\text{full}}$ takes about $17$\,s. The empirical impulse responses (Section~\ref{Empirical impulse responses}) are obtained in roughly 4\,s and scale linearly in grid size and transducer count, so they remain inexpensive compared to the inversion as the scale increases. The subsequent evaluations for new measurement vectors reduce to a single matrix--vector multiplication and take around 3--5\,ms in the presented case. From a computational perspective, this separation between a moderately expensive calibration step and very fast evaluation makes the method potentially viable as a low-cost, touchscreen application as in \cite{Touchscreen}. The evaluation does not have any memory requirements, potentially allowing frequent automated SHM on a simple system.
+
+
+
+\subsection{Sensor Configurations}\label{Appendix_sensor_configs}
+The sensor configuration used in this paper (Section~\ref{Operator assembly}) is
+[[1,2], [1,3], [1,4], [1,5], [2,3], [2,4], [2,5], [3,4], [3,5], [4,5] ].
+For the echo configuration in Figure~\ref{fig:ECHO}, it is [[1,1]]. The 5-sensor configuration is chosen to avoid including symmetric pairs such as [[1,2],[2,1]], which, under the reciprocity assumption, are expected to provide limited additional information. Testing confirmed this behavior.
+\paragraph{}
+In hindsight, a layout such as [[1,2], [1,3], [2,3], [2,4], [3,4], ...] may better balance the roles of the emitters. This was considered too late for the present study. Follow-up tests did not reveal noticeable improvements, and the original configuration was retained.
+\paragraph{}
+Including a full set of measurements, including self-measurements such as ([1,1],[2,2] etc.), should in principle improve the reconstruction. However, in our tests it tended to reduce reconstruction quality. This behavior is unexpected given that the single-pulse case in Figure~\ref{fig:ECHO} is functional, and suggests that the additional channels may introduce systematic effects that are not captured by the present formulation.
+
+
+
+\subsection{Toward fully transducer-based monitoring}\label{Appendix_Piezoelectric}
 A fully transducer-based implementation could proceed as follows. At each transducer location, two transducers are placed in close proximity: one acting as the transmitter and one as the sensor. During calibration, a transmitting transducer emits a periodic pulse while an LDV scans the object. The sensing-transducer measurement is appended to the LDV grid-scan dataset and treated as an additional grid point. In the implementation, this measurement is assigned to the emitter location so that transducer-specific coupling effects of both transducers are absorbed into the empirically calibrated operators, potentially enabling the use of inexpensive transducers with imperfect coupling.
 
     \textbf{Notes:} Thick, cube-shaped transducers should be avoided, as their stiffness locally alters the plate and makes measurement at or by the transducer impossible. Flat, plate-like ceramic transducers should be used relative to the plate thickness.
 
  It is important to note that the physical location of the emitting transducer and the modeled transmitter location may not coincide. This is intentional and consistent with the approach in this paper, since the LDV does not scan exactly at the transducer positions. 
+
 
 
 \subsection{Generalization to arbitrary defect bases}\label{Generalization to arbitrary defect bases}
@@ -572,23 +622,6 @@ with a corresponding adjustment to the full defect vector $\mathbf{d}$ to hold t
 where for $d_{k,b}$, $k$ denotes the grid location and $b$ the basis vector index at that location.
 
 This generalized formulation is not used in this paper, since we continue using the delta-like defect basis. Simulation experiments to date have not identified alternative bases that provide a clear performance gain relative to their added computational cost. However, richer local bases may be required to improve sensitivity to CFRP delaminations, which may not exhibit a strongly delta-like temporal response; one possible route is to empirically measure the response of a delaminated region and use it as a basis vector \cite{WueestMScThesis}.
-
-
-
-\subsection{Sensor Configurations}\label{Appendix_sensor_configs}
-The sensor configuration used in this paper (Section~\ref{Operator assembly}) is
-[[1,2], [1,3], [1,4], [1,5], [2,3], [2,4], [2,5], [3,4], [3,5], [4,5] ].
-For the echo configuration in Figure~\ref{fig:ECHO}, it is [[1,1]]. The 5-sensor configuration is chosen to avoid including symmetric pairs such as [[1,2],[2,1]], which, under the reciprocity assumption, are expected to provide limited additional information. Testing confirmed this behavior.
-\paragraph{}
-In hindsight, a layout such as [[1,2],[1,3],[2,3],[2,4],[3,4],...] may better balance the roles of the emitters. This was considered too late for the present study. Follow-up tests did not reveal noticeable improvements, and the original configuration was retained.
-\paragraph{}
-Including a full set of measurements, including self-measurements such as ([1,1],[2,2] etc.), should in principle improve the reconstruction. However, in our tests it tended to reduce reconstruction quality. This behavior is unexpected given that the single-pulse case in Figure~\ref{fig:ECHO} is functional, and suggests that the additional channels may introduce systematic effects that are not captured by the present formulation.
-
-\subsection{Sub-Wavelength localization discussions}\label{Appendix_Sub-wavelentgh}
-The Sub-Wavelength localization has generated a lot of discussion, yet it remains challenging to provide a concise explanation, especially since it is difficult to demonstrate a limitation does \textit{not} occur. Based on the mathematical methodology used which does not rely on explicit spatial information, there appears to be no inherent restriction enforcing a wavelength limit. In contrast, other methods often have such restrictions, typically due to the need to reconstruct measured waves in space. For example, \cite{ebrahimkhanlou_acoustic_2017} describes a method with such a limitation, though it is not explicitly discussed there.
-\paragraph{}
-However, in the simulation study here, a decrease in resolution is observed at lower frequencies, which suggests that the method is not entirely independent of wavelength-related limits. The discussion is complicated by the fact that changing the frequency bandwidth simultaneously affects three factors: the maximum frequency, the amount of information available due to the system matrix shape (see Eq.~\ref{full_system}), and increased susceptibility to standard norm-based regularization, which can smear the result because neighboring points respond more similarly at longer wavelengths. For all intents and purposes, the method does have a resolution limitation as a function of frequency, but it is also dependent on other variables, without a hard cutoff based on frequency alone. Given the proof-of-concept nature of this paper, we refrain from exploring this topic in depth, simply noting that it is possible to isolate each variable to obtain definite answers if desired.
-
 %\printcredits
 
 %% Loading bibliography style file
